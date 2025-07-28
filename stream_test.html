@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>千问流式传输测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .response-area {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .status {
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>千问模型流式传输支持测试</h1>
+        
+        <div class="test-section">
+            <h3>测试1: 标准请求（当前方式）</h3>
+            <button onclick="testStandardRequest()">测试标准请求</button>
+            <div id="standard-status" class="status"></div>
+            <div id="standard-response" class="response-area"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>测试2: 流式请求（stream: true）</h3>
+            <button onclick="testStreamRequest()">测试流式请求</button>
+            <div id="stream-status" class="status"></div>
+            <div id="stream-response" class="response-area"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>测试结果分析</h3>
+            <div id="analysis" class="response-area">点击上方按钮开始测试...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://api.siliconflow.cn/v1/chat/completions';
+        const API_KEY = 'sk-kyuhswemmhnjlftcwwbdxoudivvxiqhfackqaxrrkwrmllyl'; // 请替换为实际的API密钥
+        const MODEL_NAME = 'Qwen/Qwen2.5-7B-Instruct';
+        
+        const testMessage = {
+            role: 'user',
+            content: '请用100字左右介绍一下人工智能的发展历程'
+        };
+
+        async function testStandardRequest() {
+            const statusEl = document.getElementById('standard-status');
+            const responseEl = document.getElementById('standard-response');
+            
+            statusEl.textContent = '正在发送标准请求...';
+            statusEl.className = 'status info';
+            responseEl.textContent = '';
+            
+            const startTime = Date.now();
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: MODEL_NAME,
+                        messages: [testMessage],
+                        temperature: 0.7,
+                        max_tokens: 200
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+                
+                statusEl.textContent = `标准请求成功 (耗时: ${duration}ms)`;
+                statusEl.className = 'status success';
+                responseEl.textContent = data.choices[0].message.content;
+                
+                updateAnalysis('standard', true, duration, data.choices[0].message.content.length);
+                
+            } catch (error) {
+                statusEl.textContent = `标准请求失败: ${error.message}`;
+                statusEl.className = 'status error';
+                responseEl.textContent = error.stack;
+                updateAnalysis('standard', false, 0, 0, error.message);
+            }
+        }
+
+        async function testStreamRequest() {
+            const statusEl = document.getElementById('stream-status');
+            const responseEl = document.getElementById('stream-response');
+            
+            statusEl.textContent = '正在发送流式请求...';
+            statusEl.className = 'status info';
+            responseEl.textContent = '';
+            
+            const startTime = Date.now();
+            let firstChunkTime = null;
+            let totalContent = '';
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: MODEL_NAME,
+                        messages: [testMessage],
+                        temperature: 0.7,
+                        max_tokens: 200,
+                        stream: true  // 关键参数
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    
+                    if (done) break;
+                    
+                    if (!firstChunkTime) {
+                        firstChunkTime = Date.now();
+                        statusEl.textContent = `开始接收流式数据 (首次响应: ${firstChunkTime - startTime}ms)`;
+                    }
+                    
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const data = line.slice(6);
+                            if (data === '[DONE]') continue;
+                            
+                            try {
+                                const parsed = JSON.parse(data);
+                                const content = parsed.choices[0]?.delta?.content || '';
+                                if (content) {
+                                    totalContent += content;
+                                    responseEl.textContent = totalContent;
+                                }
+                            } catch (e) {
+                                // 忽略解析错误
+                            }
+                        }
+                    }
+                }
+                
+                const endTime = Date.now();
+                const totalDuration = endTime - startTime;
+                const firstChunkDuration = firstChunkTime - startTime;
+                
+                statusEl.textContent = `流式请求成功 (总耗时: ${totalDuration}ms, 首次响应: ${firstChunkDuration}ms)`;
+                statusEl.className = 'status success';
+                
+                updateAnalysis('stream', true, totalDuration, totalContent.length, null, firstChunkDuration);
+                
+            } catch (error) {
+                statusEl.textContent = `流式请求失败: ${error.message}`;
+                statusEl.className = 'status error';
+                responseEl.textContent = error.stack;
+                updateAnalysis('stream', false, 0, 0, error.message);
+            }
+        }
+
+        let testResults = {};
+
+        function updateAnalysis(type, success, duration, contentLength, error = null, firstChunkTime = null) {
+            testResults[type] = {
+                success,
+                duration,
+                contentLength,
+                error,
+                firstChunkTime
+            };
+            
+            const analysisEl = document.getElementById('analysis');
+            let analysis = '测试结果分析:\n\n';
+            
+            if (testResults.standard) {
+                const std = testResults.standard;
+                analysis += `标准请求: ${std.success ? '✅ 成功' : '❌ 失败'}\n`;
+                if (std.success) {
+                    analysis += `  - 耗时: ${std.duration}ms\n`;
+                    analysis += `  - 内容长度: ${std.contentLength}字符\n`;
+                } else {
+                    analysis += `  - 错误: ${std.error}\n`;
+                }
+                analysis += '\n';
+            }
+            
+            if (testResults.stream) {
+                const str = testResults.stream;
+                analysis += `流式请求: ${str.success ? '✅ 成功' : '❌ 失败'}\n`;
+                if (str.success) {
+                    analysis += `  - 总耗时: ${str.duration}ms\n`;
+                    analysis += `  - 首次响应: ${str.firstChunkTime}ms\n`;
+                    analysis += `  - 内容长度: ${str.contentLength}字符\n`;
+                } else {
+                    analysis += `  - 错误: ${str.error}\n`;
+                }
+                analysis += '\n';
+            }
+            
+            if (testResults.standard && testResults.stream) {
+                analysis += '对比分析:\n';
+                if (testResults.standard.success && testResults.stream.success) {
+                    analysis += `✅ 千问模型支持流式传输！\n`;
+                    analysis += `- 用户感知延迟减少: ${testResults.standard.duration - testResults.stream.firstChunkTime}ms\n`;
+                    analysis += `- 建议: 可以实现流式显示来改善用户体验\n`;
+                } else if (testResults.standard.success && !testResults.stream.success) {
+                    analysis += `❌ 千问模型不支持流式传输\n`;
+                    analysis += `- 建议: 优化加载提示和用户体验设计\n`;
+                } else {
+                    analysis += `⚠️ 测试结果不完整，请检查API密钥配置\n`;
+                }
+            }
+            
+            analysisEl.textContent = analysis;
+        }
+    </script>
+</body>
+</html>

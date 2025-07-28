@@ -267,6 +267,29 @@
         const collapseHistoryBtn = document.getElementById('collapseHistoryBtn');
         const contextMenu = document.getElementById('contextMenu');
 
+        // --- UTILITY FUNCTIONS ---
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        function removeLoadingMessage() {
+            const loadingElements = document.querySelectorAll('.loading-dots');
+            loadingElements.forEach(element => {
+                const messageDiv = element.closest('.chat-message');
+                if (messageDiv && messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            });
+        }
+
+        function smartScrollToBottom() {
+            // 检查用户是否接近底部（容差50px）
+            const isNearBottom = chatHistoryContainer.scrollTop + chatHistoryContainer.clientHeight >= chatHistoryContainer.scrollHeight - 50;
+            if (isNearBottom) {
+                chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+            }
+        }
+
         // --- CORE FUNCTIONS ---
         function saveSessions() {
             localStorage.setItem('secretaryAiSessions', JSON.stringify(sessions));
@@ -611,14 +634,66 @@
                         model: MODEL_NAME,
                         messages: [{ role: 'system', content: systemPrompt }, ...currentSession.messages.slice(-10).map(m => ({role: m.role, content: m.content}))], // API doesn't need ID
                         temperature: 0.7,
-                        max_tokens: 2000
+                        max_tokens: 2000,
+                        stream: true  // 启用流式传输
                     })
                 });
 
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 
-                const data = await response.json();
-                let aiResponseContent = data.choices[0].message.content;
+                // 流式处理响应
+                let aiResponseContent = '';
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                
+                // 创建AI消息容器
+                const aiMessage = {
+                    id: generateId(),
+                    role: 'assistant',
+                    content: '',
+                    timestamp: new Date().toISOString()
+                };
+                
+                let hasReceivedContent = false;
+                let messageElement = null;
+                
+                // 流式读取和显示
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const data = line.slice(6);
+                            if (data === '[DONE]') continue;
+                            
+                            try {
+                                const parsed = JSON.parse(data);
+                                const content = parsed.choices[0]?.delta?.content || '';
+                                if (content) {
+                                    // 首次接收到内容时创建AI消息框并移除加载动画
+                                    if (!hasReceivedContent) {
+                                        removeLoadingMessage();
+                                        addMessageToChat('', false, aiMessage.id, false);
+                                        messageElement = document.querySelector(`[data-message-id="${aiMessage.id}"] div`);
+                                        hasReceivedContent = true;
+                                    }
+                                    aiResponseContent += content;
+                                    aiMessage.content = aiResponseContent;
+                                    // 实时更新显示内容
+                                    messageElement.innerHTML = marked.parse(aiResponseContent);
+                                    // 智能滚动到底部（只有用户在底部时才滚动）
+                                    smartScrollToBottom();
+                                }
+                            } catch (e) {
+                                // 忽略JSON解析错误
+                            }
+                        }
+                    }
+                }
                 
                 // 智能提醒模式特殊处理
                 if (currentSession.mode === 'reminder') {
@@ -642,21 +717,23 @@
                                 notificationStatus = '⚠️ 通知待授权';
                             }
                             
-                            aiResponseContent += `\n\n✅ **提醒创建成功**\n📅 ${dateStr} ${timeStr}\n📝 ${parsed.content}\n⏰ ${delay > 0 ? delay + '分钟后提醒' : '时间已过'}\n🔔 ${notificationStatus}`;
+                            const reminderInfo = `\n\n✅ **提醒创建成功**\n📅 ${dateStr} ${timeStr}\n📝 ${parsed.content}\n⏰ ${delay > 0 ? delay + '分钟后提醒' : '时间已过'}\n🔔 ${notificationStatus}`;
+                            aiResponseContent += reminderInfo;
+                            aiMessage.content = aiResponseContent;
+                            // 更新显示内容
+                            messageElement.innerHTML = marked.parse(aiResponseContent);
                         } catch (error) {
                             console.error('创建提醒失败:', error);
-                            aiResponseContent += `\n\n❌ 提醒创建失败：${error.message}`;
+                            const errorInfo = `\n\n❌ 提醒创建失败：${error.message}`;
+                            aiResponseContent += errorInfo;
+                            aiMessage.content = aiResponseContent;
+                            // 更新显示内容
+                            messageElement.innerHTML = marked.parse(aiResponseContent);
                         }
                     }
                 }
                 
-                const aiMessage = { role: 'assistant', content: aiResponseContent, id: Date.now() + 1 };
-                
-                if (loadingDiv && loadingDiv.parentNode === chatHistoryContainer) {
-                    chatHistoryContainer.removeChild(loadingDiv);
-                }
-                // Use typewriter effect for AI responses
-                addMessageToChat(aiMessage.content, false, aiMessage.id, true);
+                // 保存完整的AI消息到会话历史
                 currentSession.messages.push(aiMessage);
                 saveSessions();
 
@@ -695,11 +772,18 @@
         // --- CONTEXT MENU FUNCTIONS ---
         function showContextMenu(e) {
             e.preventDefault();
-            const messageEl = e.target.closest('.chat-message');
-            if (!messageEl) return;
-
-            const messageId = messageEl.dataset.messageId;
-            contextMenu.dataset.targetMessageId = messageId;
+            // 检查是否在聊天历史列表中
+            const chatItem = e.target.closest('a');
+            if (!chatItem) return;
+            
+            // 找到对应的session
+            const sessionIndex = Array.from(chatHistoryList.children).indexOf(chatItem);
+            if (sessionIndex === -1) return;
+            
+            const session = sessions[sessions.length - 1 - sessionIndex]; // 因为使用prepend，顺序是反的
+            if (!session) return;
+            
+            contextMenu.dataset.targetSessionId = session.id;
             
             contextMenu.style.top = `${e.clientY}px`;
             contextMenu.style.left = `${e.clientX}px`;
@@ -711,19 +795,25 @@
         }
 
         function deleteMessageHandler() {
-            const messageId = contextMenu.dataset.targetMessageId;
-            if (!messageId) return;
-
-            const session = sessions.find(s => s.id === activeSessionId);
-            if (!session) return;
-
-            session.messages = session.messages.filter(m => m.id != messageId);
-            saveSessions();
-
-            const messageEl = document.querySelector(`[data-message-id='${messageId}']`);
-            if (messageEl) {
-                messageEl.remove();
+            const sessionId = contextMenu.dataset.targetSessionId;
+            if (!sessionId) return;
+            
+            // 确认删除
+            if (confirm('确定要删除这个对话吗？此操作不可撤销。')) {
+                // 从sessions数组中移除
+                sessions = sessions.filter(session => session.id !== sessionId);
+                saveSessions();
+                
+                // 如果删除的是当前活跃会话，切换到新对话
+                if (activeSessionId === sessionId) {
+                    activeSessionId = null;
+                    showNewChatScreen();
+                }
+                
+                // 重新渲染聊天列表
+                renderChatList();
             }
+            
             hideContextMenu();
         }
 
@@ -1092,8 +1182,8 @@
                 clearAllHistory();
             });
 
-            // Context Menu Listeners
-            chatHistoryContainer.addEventListener('contextmenu', showContextMenu);
+            // Context Menu Listeners (绑定到侧边栏聊天历史)
+            chatHistoryList.addEventListener('contextmenu', showContextMenu);
             window.addEventListener('click', hideContextMenu);
 
             // Sidebar Collapse Listeners
