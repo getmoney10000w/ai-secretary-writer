@@ -230,7 +230,7 @@
         // --- CONFIGURATION ---
         const API_KEY = 'sk-kyuhswemmhnjlftcwwbdxoudivvxiqhfackqaxrrkwrmllyl';
         const API_URL = 'https://api.siliconflow.cn/v1/chat/completions';
-        let MODEL_NAME = 'Qwen/Qwen2.5-7B-Instruct';
+        let MODEL_NAME = 'Qwen/Qwen3-8B';
         
         // Available models
         const AVAILABLE_MODELS = [
@@ -388,14 +388,46 @@
             renderChatList();
         }
 
-        function addMessageToChat(content, isUser, messageId) {
+        function addMessageToChat(content, isUser, messageId, useTypewriter = false) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `chat-message ${isUser ? 'user-message' : 'ai-message'}`;
             messageDiv.dataset.messageId = messageId;
-            const parsedContent = isUser ? content.replace(/\n/g, '<br>') : marked.parse(content);
-            messageDiv.innerHTML = `<div>${parsedContent}</div>`;
-            chatHistoryContainer.appendChild(messageDiv);
-            chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+            
+            if (isUser || !useTypewriter) {
+                const parsedContent = isUser ? content.replace(/\n/g, '<br>') : marked.parse(content);
+                messageDiv.innerHTML = `<div>${parsedContent}</div>`;
+                chatHistoryContainer.appendChild(messageDiv);
+                chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+            } else {
+                // AI message with typewriter effect
+                const contentDiv = document.createElement('div');
+                messageDiv.appendChild(contentDiv);
+                chatHistoryContainer.appendChild(messageDiv);
+                
+                // Start typewriter effect
+                typewriterEffect(contentDiv, content);
+            }
+        }
+        
+        function typewriterEffect(element, text, speed = 30) {
+            let index = 0;
+            let currentText = '';
+            
+            function typeNextChar() {
+                if (index < text.length) {
+                    currentText += text[index];
+                    // Parse markdown for each update to maintain formatting
+                    element.innerHTML = marked.parse(currentText);
+                    index++;
+                    
+                    // Auto-scroll to bottom
+                    chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+                    
+                    setTimeout(typeNextChar, speed);
+                }
+            }
+            
+            typeNextChar();
         }
 
         async function sendMessage() {
@@ -449,10 +481,69 @@
             try {
                 let systemPrompt = '';
                 switch (currentSession.mode) {
-                    case 'qa': systemPrompt = '你是一个专业的文秘工作助理...'; break;
-                    case 'material': systemPrompt = '你是一个专业的文秘材料生成助理...'; break;
-                    case 'correct': systemPrompt = '你是一个专业的文档校对助理...'; break;
-                    default: systemPrompt = '你是一个专业的文秘工作助理...';
+                    case 'qa': 
+                        systemPrompt = `你是一个专业的文秘工作智能助理，专门负责解答办公、会议、行政管理等相关问题。
+
+你的职责包括：
+1. 解答办公流程、制度规范、工作安排等问题
+2. 提供会议组织、接待礼仪、公文处理等专业建议
+3. 协助解决日常行政事务和工作协调问题
+4. 提供时间管理、效率提升等工作方法指导
+
+回答要求：
+- 准确专业，基于文秘工作实践
+- 条理清晰，便于理解和执行
+- 提供具体可操作的建议
+- 语言正式但亲和，符合办公环境`;
+                        break;
+                    case 'material': 
+                        systemPrompt = `你是一个专业的文秘材料生成助理，擅长撰写各类公文、报告、总结等办公文档。
+
+你的专长包括：
+1. 公文写作：通知、通报、请示、报告、函件等
+2. 工作总结：月度、季度、年度工作总结
+3. 计划方案：工作计划、活动方案、实施细则
+4. 会议文档：会议纪要、发言稿、汇报材料
+5. 其他文档：制度规范、操作手册、宣传材料
+
+写作要求：
+- 格式规范，符合公文标准
+- 内容充实，逻辑清晰
+- 语言准确，表达得体
+- 结构完整，要素齐全
+- 根据具体需求调整文风和详细程度`;
+                        break;
+                    case 'correct': 
+                        systemPrompt = `你是一个专业的文档校对助理，专门负责检查和纠正各类文档中的错误。
+
+你的校对范围：
+1. 错别字检查：识别并纠正错误的汉字
+2. 语法错误：修正语法结构、句式问题
+3. 标点符号：规范标点使用，确保准确性
+4. 格式规范：检查文档格式、排版问题
+5. 逻辑表达：优化语言表达，提升文档质量
+6. 专业术语：确保专业词汇使用准确
+
+校对原则：
+- 保持原文意思不变
+- 提供具体的修改建议
+- 说明修改理由
+- 标注修改位置
+- 区分错误类型（错别字/语法/格式等）
+- 提供修改前后对比`;
+                        break;
+                    default: 
+                        systemPrompt = `你是一个专业的文秘工作智能助理，能够协助处理各类办公事务。
+
+主要功能：
+1. 智能问答：解答办公、会议、行政管理问题
+2. 材料生成：撰写公文、报告、总结等文档
+3. 智能纠错：校对文档错误，优化表达
+
+工作原则：
+- 专业准确，服务高效
+- 格式规范，内容充实
+- 语言得体，表达清晰`;
                 }
 
                 const response = await fetch(API_URL, {
@@ -475,7 +566,8 @@
                 if (loadingDiv && loadingDiv.parentNode === chatHistoryContainer) {
                     chatHistoryContainer.removeChild(loadingDiv);
                 }
-                addMessageToChat(aiMessage.content, false, aiMessage.id);
+                // Use typewriter effect for AI responses
+                addMessageToChat(aiMessage.content, false, aiMessage.id, true);
                 currentSession.messages.push(aiMessage);
                 saveSessions();
 
