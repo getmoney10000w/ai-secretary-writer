@@ -137,7 +137,7 @@
                         </div>
                         <h2 class="text-2xl font-semibold">文秘工作AI智能小助理</h2>
                         <p class="text-gray-500">请选择一个模式开始对话</p>
-                        <div id="modeSelection" class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+                        <div id="modeSelection" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
                             <button class="p-4 border rounded-lg hover:bg-gray-100 text-left" onclick="setMode('qa')">
                                 <h3 class="font-semibold">智能问答</h3>
                                 <p class="text-sm text-gray-500">解答办公、会议等问题</p>
@@ -149,6 +149,10 @@
                              <button class="p-4 border rounded-lg hover:bg-gray-100 text-left" onclick="setMode('correct')">
                                 <h3 class="font-semibold">智能纠错</h3>
                                 <p class="text-sm text-gray-500">校对错别字、语法、格式</p>
+                            </button>
+                            <button class="p-4 border rounded-lg hover:bg-gray-100 text-left" onclick="setMode('reminder')">
+                                <h3 class="font-semibold">⏰ 智能提醒</h3>
+                                <p class="text-sm text-gray-500">设置日程提醒和通知</p>
                             </button>
                         </div>
                     </div>
@@ -351,6 +355,30 @@
                 modeInfoBar.style.display = 'block';
             }
             
+            // 智能提醒模式特殊处理
+            if (mode === 'reminder') {
+                // 显示通知权限状态
+                const permissionStatus = Notification.permission;
+                let statusMessage = '';
+                let statusColor = '';
+                
+                if (permissionStatus === 'granted') {
+                    statusMessage = '✅ 通知权限已授权';
+                    statusColor = 'text-green-600';
+                } else if (permissionStatus === 'denied') {
+                    statusMessage = '❌ 通知权限被拒绝，请在浏览器设置中允许通知';
+                    statusColor = 'text-red-600';
+                } else {
+                    statusMessage = '⚠️ 通知权限待授权，将在创建提醒时请求';
+                    statusColor = 'text-yellow-600';
+                }
+                
+                // 在模式描述下方添加权限状态
+                if (modeDescription) {
+                    modeDescription.innerHTML = `设置日程提醒和通知<br><span class="${statusColor} text-sm">${statusMessage}</span>`;
+                }
+            }
+            
             userInput.focus();
             userInput.placeholder = `已选择${selectedBtn.querySelector('h3').textContent}模式，开始提问...`;
         }
@@ -374,7 +402,8 @@
                 const modeNames = {
                     'qa': { name: '智能问答', desc: '解答办公、会议等问题' },
                     'material': { name: '材料生成', desc: '撰写公文、报告、总结' },
-                    'correct': { name: '智能纠错', desc: '校对错别字、语法、格式' }
+                    'correct': { name: '智能纠错', desc: '校对错别字、语法、格式' },
+                    'reminder': { name: '⏰ 智能提醒', desc: '设置日程提醒和通知' }
                 };
                 
                 const modeInfo = modeNames[session.mode];
@@ -532,6 +561,33 @@
 - 区分错误类型（错别字/语法/格式等）
 - 提供修改前后对比`;
                         break;
+                    case 'reminder':
+                        systemPrompt = `你是一个专业的智能提醒助理，专门负责帮助用户管理日程和设置提醒。
+
+核心职责：
+1. 解析用户的自然语言时间表达
+2. 创建准确的日程提醒
+3. 与日历系统同步
+4. 提供友好的确认和反馈
+
+支持的时间格式：
+- 相对时间：今天、明天、后天 + 具体时间
+- 绝对时间：具体日期 + 时间
+- 周期性：每天、每周、每月等
+
+工作要求：
+- 准确识别时间信息（日期、时间、周期性）
+- 提取提醒内容和重要性
+- 处理模糊时间表达，合理推测用户意图
+- 提供清晰的确认信息
+- 支持提醒的增删改查
+- 语言友好，确认准确
+
+当用户输入包含时间和提醒内容时，请按以下格式回复：
+"我将为您设置提醒：[日期] [时间] - [提醒内容]，是否确认？"
+
+如果时间表达不够明确，请主动询问具体时间。`;
+                        break;
                     default: 
                         systemPrompt = `你是一个专业的文秘工作智能助理，能够协助处理各类办公事务。
 
@@ -539,6 +595,7 @@
 1. 智能问答：解答办公、会议、行政管理问题
 2. 材料生成：撰写公文、报告、总结等文档
 3. 智能纠错：校对文档错误，优化表达
+4. 智能提醒：设置日程提醒和通知
 
 工作原则：
 - 专业准确，服务高效
@@ -560,7 +617,40 @@
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 
                 const data = await response.json();
-                const aiResponseContent = data.choices[0].message.content;
+                let aiResponseContent = data.choices[0].message.content;
+                
+                // 智能提醒模式特殊处理
+                if (currentSession.mode === 'reminder') {
+                    const parsed = TimeParser.parseNaturalTime(userMessage.content);
+                    const notificationPermission = Notification.permission;
+                    
+                    if (parsed.isValid) {
+                        try {
+                            const reminder = ReminderManager.createReminder(parsed.content, parsed.dateTime);
+                            const dateStr = parsed.dateTime.toLocaleDateString('zh-CN');
+                            const timeStr = parsed.dateTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+                            const now = new Date();
+                            const delay = Math.round((parsed.dateTime - now) / 1000 / 60); // 分钟
+                            
+                            let notificationStatus = '';
+                            if (notificationPermission === 'granted') {
+                                notificationStatus = '✅ 已授权，将在指定时间弹出通知';
+                            } else if (notificationPermission === 'denied') {
+                                notificationStatus = '❌ 通知被拒绝，请在浏览器设置中允许通知';
+                            } else {
+                                notificationStatus = '⚠️ 通知权限待授权，请点击浏览器提示允许通知';
+                            }
+                            
+                            aiResponseContent += `\n\n✅ **提醒已创建成功！**\n\n📅 **日期时间**：${dateStr} ${timeStr}\n📝 **提醒内容**：${parsed.content}\n⏰ **倒计时**：${delay > 0 ? delay + '分钟后' : '已过期'}\n🔔 **通知状态**：${notificationStatus}\n📋 **日历同步**：已同步到工作日历\n🆔 **提醒ID**：${reminder.id}\n\n您可以在左侧的工作日历中查看此提醒。`;
+                        } catch (error) {
+                            console.error('创建提醒失败:', error);
+                            aiResponseContent += `\n\n❌ 提醒创建失败：${error.message}\n\n🔍 **调试信息**：\n- 通知权限：${notificationPermission}\n- 解析结果：${JSON.stringify(parsed, null, 2)}`;
+                        }
+                    } else {
+                        aiResponseContent += `\n\n⚠️ **时间解析失败**\n\n请使用以下格式：\n- "提醒我明天上午9点开会"\n- "提醒我今天下午3点30分"\n- "提醒我1月15日14:00"\n\n🔍 **调试信息**：\n- 输入文本："${userMessage.content}"\n- 解析结果：${JSON.stringify(parsed, null, 2)}`;
+                    }
+                }
+                
                 const aiMessage = { role: 'assistant', content: aiResponseContent, id: Date.now() + 1 };
                 
                 if (loadingDiv && loadingDiv.parentNode === chatHistoryContainer) {
@@ -736,7 +826,7 @@
             }
             
             let events = JSON.parse(localStorage.getItem('secretaryEvents') || '[]');
-            events.push({ id: Date.now(), date, time, text });
+            events.push({ id: Date.now(), date, time, text, type: 'manual' });
             localStorage.setItem('secretaryEvents', JSON.stringify(events));
             
             textInput.value = '';
@@ -761,15 +851,20 @@
                 return;
             }
             
-            eventsList.innerHTML = dayEvents.map(event => `
-                <div class="flex justify-between items-center p-2 border-b">
-                    <div>
-                        <div class="font-semibold">${event.time ? event.time : '全天'}</div>
-                        <div class="text-sm text-gray-600">${event.text}</div>
+            eventsList.innerHTML = dayEvents.map(event => {
+                const typeIcon = event.type === 'reminder' ? '⏰' : '📅';
+                const typeLabel = event.type === 'reminder' ? '智能提醒' : '手动事件';
+                return `
+                    <div class="flex justify-between items-center p-2 border-b">
+                        <div>
+                            <div class="font-semibold">${typeIcon} ${event.time ? event.time : '全天'}</div>
+                            <div class="text-sm text-gray-600">${event.text}</div>
+                            <div class="text-xs text-blue-500">${typeLabel}</div>
+                        </div>
+                        <button onclick="deleteModalEvent(${event.id})" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">删除</button>
                     </div>
-                    <button onclick="deleteModalEvent(${event.id})" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">删除</button>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function deleteModalEvent(id) {
@@ -780,6 +875,248 @@
             loadModalEvents();
         }
 
+        // --- REMINDER SYSTEM ---
+        class TimeParser {
+            static parseNaturalTime(text) {
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                
+                // 相对时间正则表达式
+                const relativeTimeRegex = /(\d+)(分钟|小时|天)后/;
+                const relativeMatch = text.match(relativeTimeRegex);
+                
+                if (relativeMatch) {
+                    // 处理相对时间："1分钟后"、"30分钟后"、"2小时后"等
+                    const value = parseInt(relativeMatch[1]);
+                    const unit = relativeMatch[2];
+                    const targetDateTime = new Date(now);
+                    
+                    if (unit === '分钟') {
+                        targetDateTime.setMinutes(targetDateTime.getMinutes() + value);
+                    } else if (unit === '小时') {
+                        targetDateTime.setHours(targetDateTime.getHours() + value);
+                    } else if (unit === '天') {
+                        targetDateTime.setDate(targetDateTime.getDate() + value);
+                    }
+                    
+                    let content = text.replace(relativeTimeRegex, '').replace(/提醒我?/g, '').trim();
+                    if (!content) content = '提醒';
+                    
+                    return {
+                        dateTime: targetDateTime,
+                        content: content,
+                        isValid: true
+                    };
+                }
+                
+                // 绝对时间正则表达式
+                const timeRegex = /(\d{1,2})[:：点](\d{0,2})[分]?/;
+                const dateRegex = /(\d{1,2})月(\d{1,2})[日号]/;
+                const yearDateRegex = /(\d{4})年(\d{1,2})月(\d{1,2})[日号]/;
+                const standardTimeRegex = /(\d{1,2}):(\d{2})/; // 标准时间格式 HH:MM
+                
+                let targetDate = new Date(today);
+                let targetTime = { hour: 9, minute: 0 }; // 默认时间
+                let hasTimeInfo = false;
+                
+                // 解析相对日期
+                if (text.includes('今天') || text.includes('今晚')) {
+                    // 保持今天
+                } else if (text.includes('明天')) {
+                    targetDate.setDate(targetDate.getDate() + 1);
+                } else if (text.includes('后天')) {
+                    targetDate.setDate(targetDate.getDate() + 2);
+                } else if (text.includes('下周')) {
+                    targetDate.setDate(targetDate.getDate() + 7);
+                }
+                
+                // 解析绝对日期
+                const yearDateMatch = text.match(yearDateRegex);
+                if (yearDateMatch) {
+                    const year = parseInt(yearDateMatch[1]);
+                    const month = parseInt(yearDateMatch[2]) - 1;
+                    const day = parseInt(yearDateMatch[3]);
+                    targetDate = new Date(year, month, day);
+                } else {
+                    const dateMatch = text.match(dateRegex);
+                    if (dateMatch) {
+                        const month = parseInt(dateMatch[1]) - 1;
+                        const day = parseInt(dateMatch[2]);
+                        targetDate = new Date(now.getFullYear(), month, day);
+                        // 如果日期已过，设为明年
+                        if (targetDate < today) {
+                            targetDate.setFullYear(targetDate.getFullYear() + 1);
+                        }
+                    }
+                }
+                
+                // 解析时间 - 优先匹配标准格式
+                const standardTimeMatch = text.match(standardTimeRegex);
+                if (standardTimeMatch) {
+                    targetTime.hour = parseInt(standardTimeMatch[1]);
+                    targetTime.minute = parseInt(standardTimeMatch[2]);
+                    hasTimeInfo = true;
+                } else {
+                    const timeMatch = text.match(timeRegex);
+                    if (timeMatch) {
+                        targetTime.hour = parseInt(timeMatch[1]);
+                        targetTime.minute = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
+                        hasTimeInfo = true;
+                    }
+                }
+                
+                // 处理特殊时间表达
+                if (text.includes('上午') && targetTime.hour > 12) {
+                    targetTime.hour -= 12;
+                } else if (text.includes('下午') && targetTime.hour < 12 && targetTime.hour !== 12) {
+                    targetTime.hour += 12;
+                } else if (text.includes('中午')) {
+                    targetTime.hour = 12;
+                    targetTime.minute = 0;
+                    hasTimeInfo = true;
+                } else if ((text.includes('晚上') || text.includes('今晚')) && targetTime.hour < 12) {
+                    targetTime.hour += 12;
+                } else if (text.includes('凌晨') && targetTime.hour >= 6) {
+                    targetTime.hour -= 12;
+                    if (targetTime.hour < 0) targetTime.hour += 24;
+                }
+                
+                // 如果是"今晚"但没有具体时间，默认设为晚上8点
+                if (text.includes('今晚') && !hasTimeInfo) {
+                    targetTime.hour = 20;
+                    targetTime.minute = 0;
+                }
+                
+                // 提取提醒内容
+                let content = text.replace(/(今天|今晚|明天|后天|下周|\d{4}年|\d{1,2}月\d{1,2}[日号]|\d{1,2}[:：点]\d{0,2}[分]?|\d{1,2}:\d{2}|上午|下午|中午|晚上|凌晨|提醒我?)/g, '').trim();
+                
+                // 如果没有内容，使用默认内容
+                if (!content) {
+                    content = '提醒';
+                }
+                
+                const finalDateTime = new Date(targetDate);
+                finalDateTime.setHours(targetTime.hour, targetTime.minute, 0, 0);
+                
+                // 如果解析出的时间已经过去，且是今天的时间，则设为明天
+                if (finalDateTime <= now && targetDate.toDateString() === today.toDateString()) {
+                    finalDateTime.setDate(finalDateTime.getDate() + 1);
+                }
+                
+                return {
+                    dateTime: finalDateTime,
+                    content: content,
+                    isValid: content.length > 0 && finalDateTime > now
+                };
+            }
+        }
+        
+        class ReminderManager {
+            static createReminder(content, dateTime) {
+                const reminder = {
+                    id: Date.now(),
+                    date: dateTime.toISOString().split('T')[0],
+                    time: dateTime.toTimeString().slice(0, 5),
+                    text: content,
+                    type: 'reminder',
+                    notified: false,
+                    source: 'ai_reminder',
+                    dateTime: dateTime.getTime()
+                };
+                
+                // 保存到日历事件
+                let events = JSON.parse(localStorage.getItem('secretaryEvents') || '[]');
+                events.push(reminder);
+                localStorage.setItem('secretaryEvents', JSON.stringify(events));
+                
+                // 设置通知
+                NotificationService.scheduleNotification(reminder);
+                
+                return reminder;
+            }
+            
+            static checkPendingReminders() {
+                const now = new Date().getTime();
+                const events = JSON.parse(localStorage.getItem('secretaryEvents') || '[]');
+                
+                events.forEach(event => {
+                    if (event.type === 'reminder' && !event.notified && event.dateTime <= now) {
+                        NotificationService.showNotification(event.text, {
+                            body: `提醒时间：${event.date} ${event.time}`,
+                            icon: '/favicon.ico',
+                            tag: `reminder-${event.id}`
+                        });
+                        
+                        // 标记为已通知
+                        event.notified = true;
+                        localStorage.setItem('secretaryEvents', JSON.stringify(events));
+                    }
+                });
+            }
+        }
+        
+        class NotificationService {
+            static async requestPermission() {
+                if ('Notification' in window) {
+                    const permission = await Notification.requestPermission();
+                    return permission === 'granted';
+                }
+                return false;
+            }
+            
+            static showNotification(title, options = {}) {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    return new Notification(title, {
+                        body: options.body || '',
+                        icon: options.icon || '/favicon.ico',
+                        tag: options.tag || 'reminder',
+                        requireInteraction: true,
+                        ...options
+                    });
+                }
+            }
+            
+            static scheduleNotification(reminder) {
+                const now = new Date().getTime();
+                const delay = reminder.dateTime - now;
+                
+                if (delay > 0) {
+                    setTimeout(() => {
+                        this.showNotification(reminder.text, {
+                            body: `提醒时间：${reminder.date} ${reminder.time}`,
+                            icon: '/favicon.ico',
+                            tag: `reminder-${reminder.id}`
+                        });
+                    }, delay);
+                }
+            }
+        }
+        
+        // 初始化通知权限和提醒检查
+        async function initializeReminderSystem() {
+            console.log('初始化提醒系统...');
+            
+            // 请求通知权限
+            const permission = await NotificationService.requestPermission();
+            console.log('通知权限状态:', Notification.permission);
+            
+            // 如果权限被拒绝，显示提示
+            if (Notification.permission === 'denied') {
+                console.warn('通知权限被拒绝，提醒功能将无法正常工作');
+            }
+            
+            // 定期检查提醒
+            setInterval(() => {
+                ReminderManager.checkPendingReminders();
+            }, 30000); // 每30秒检查一次，更频繁
+            
+            // 立即检查一次
+            ReminderManager.checkPendingReminders();
+        }
+        
+        // 页面加载完成后初始化
+        initializeReminderSystem();
+        
         // --- MODE MANAGEMENT ---
         // Mode management is handled in setMode() and loadChat() functions
 
