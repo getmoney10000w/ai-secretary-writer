@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>党建工作AI智能小助理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Helvetica Neue', 'Arial', 'sans-serif';
+        }
+        .chat-message {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        .user-message {
+            background-color: #f3f4f6;
+            margin-left: 2rem;
+        }
+        .ai-message {
+            background-color: #dbeafe;
+            margin-right: 2rem;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background-color: #e5e7eb;
+            border: 1px solid #e5e7eb;
+        }
+        .calendar-day {
+            background-color: white;
+            padding: 0.5rem;
+            min-height: 60px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .calendar-day:hover {
+            background-color: #f3f4f6;
+        }
+        .calendar-day.has-event {
+            background-color: #fef3c7;
+        }
+        .event-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            margin: 2px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex justify-center items-start min-h-screen py-10">
+
+    <div class="w-full max-w-5xl mx-auto">
+        <!-- Header Section -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800">党建工作AI智能小助理</h1>
+            <p class="text-2xl text-gray-600 mt-2">移小智</p>
+            <p class="text-md text-gray-500 mt-4">融合AI技术, 助力党建智能化升级</p>
+            <div class="inline-flex items-center justify-center bg-green-100 text-green-700 rounded-full px-4 py-1 mt-4 text-sm">
+                <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                AI服务已连接
+            </div>
+        </header>
+
+        <!-- Main Interaction Card -->
+        <main class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <div class="flex items-center border border-gray-200 rounded-lg p-2">
+                <input type="text" id="userInput" placeholder="请输入党建相关问题..." class="flex-grow p-2 text-gray-700 focus:outline-none">
+                <button class="text-gray-500 hover:text-gray-700 mx-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-14 0m7 7v3m0 0v-3m0 3h-3m3 0h3" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19a7 7 0 01-7-7h14a7 7 0 01-7 7z" />
+                    </svg>
+                </button>
+                <button id="askButton" class="bg-red-600 text-white font-semibold rounded-lg px-8 py-2 hover:bg-red-700 transition-colors">
+                    提问
+                </button>
+            </div>
+            <div class="flex justify-between items-center mt-4">
+                <div class="flex items-center">
+                    <input type="checkbox" id="offline-mode" class="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                    <label for="offline-mode" class="ml-2 text-sm text-gray-600">离线模式</label>
+                </div>
+                <button id="clearHistory" class="text-sm text-gray-500 hover:text-gray-700">清除历史</button>
+            </div>
+            
+            <!-- Chat History -->
+            <div id="chatHistory" class="mt-6 max-h-96 overflow-y-auto border-t pt-4">
+                <!-- Chat messages will be displayed here -->
+            </div>
+        </main>
+
+        <!-- Feature Cards Section -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Card 1: 智能问答 -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-orange-400 p-4">
+                    <h3 class="text-xl font-bold text-white">智能问答</h3>
+                    <p class="text-sm text-white opacity-90">解答党建相关问题</p>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-600 mb-6 h-16">基于NLP技术的党建知识库，快速解答各类党建问题</p>
+                    <button id="qaButton" class="w-full border border-red-600 text-red-600 font-semibold rounded-lg py-2 hover:bg-red-50 transition-colors">
+                        立即使用
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 2: 材料生成 -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-orange-400 p-4">
+                    <h3 class="text-xl font-bold text-white">材料生成</h3>
+                    <p class="text-sm text-white opacity-90">自动生成党建材料</p>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-600 mb-6 h-16">AI自动生成会议记录、学习材料等党建文稿</p>
+                    <button id="materialButton" class="w-full border border-red-600 text-red-600 font-semibold rounded-lg py-2 hover:bg-red-50 transition-colors">
+                        立即使用
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 3: 智能纠错 -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-orange-400 p-4">
+                    <h3 class="text-xl font-bold text-white">智能纠错</h3>
+                    <p class="text-sm text-white opacity-90">检查党建材料错误</p>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-600 mb-6 h-16">深度学习引擎检查党建材料中的格式和内容错误</p>
+                    <button id="correctButton" class="w-full border border-red-600 text-red-600 font-semibold rounded-lg py-2 hover:bg-red-50 transition-colors">
+                        立即使用
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 4: 党建日历 -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-red-500">
+                <div class="bg-orange-400 p-4">
+                    <h3 class="text-xl font-bold text-white">党建日历</h3>
+                    <p class="text-sm text-white opacity-90">活动计划与提醒</p>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-600 mb-6 h-16">跟踪党建活动和学习计划，设置重要提醒</p>
+                    <button id="calendarButton" class="w-full border border-red-600 text-red-600 font-semibold rounded-lg py-2 hover:bg-red-50 transition-colors">
+                        立即使用
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Q&A History Section -->
+        <section class="bg-white rounded-lg shadow-lg p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-gray-800">AI服务状态</h2>
+                <span class="text-sm text-gray-500">连接状态: <span id="connectionStatus" class="text-green-600 font-semibold">正常</span></span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-blue-50 rounded-lg p-4">
+                    <h3 class="font-semibold text-blue-800">今日问答</h3>
+                    <p class="text-2xl font-bold text-blue-600" id="todayQA">0</p>
+                </div>
+                <div class="bg-green-50 rounded-lg p-4">
+                    <h3 class="font-semibold text-green-800">材料生成</h3>
+                    <p class="text-2xl font-bold text-green-600" id="todayMaterial">0</p>
+                </div>
+                <div class="bg-orange-50 rounded-lg p-4">
+                    <h3 class="font-semibold text-orange-800">智能纠错</h3>
+                    <p class="text-2xl font-bold text-orange-600" id="todayCorrect">0</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 材料生成模态框 -->
+    <div id="materialModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('materialModal')">&times;</span>
+            <h2 class="text-2xl font-bold mb-4">材料生成</h2>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">选择材料类型:</label>
+                <select id="materialType" class="w-full p-2 border border-gray-300 rounded-lg">
+                    <option value="speech">发言稿</option>
+                    <option value="summary">心得体会</option>
+                    <option value="report">工作报告</option>
+                    <option value="plan">学习计划</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">主题描述:</label>
+                <textarea id="materialTopic" class="w-full p-2 border border-gray-300 rounded-lg" rows="3" placeholder="请描述材料主题和要求..."></textarea>
+            </div>
+            <button onclick="generateMaterial()" class="w-full bg-red-600 text-white font-semibold rounded-lg py-2 hover:bg-red-700 transition-colors">
+                生成材料
+            </button>
+            <div id="materialResult" class="mt-4 p-4 bg-gray-50 rounded-lg" style="display:none;">
+                <h3 class="font-semibold mb-2">生成结果:</h3>
+                <div id="materialContent" class="whitespace-pre-wrap"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 智能纠错模态框 -->
+    <div id="correctModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('correctModal')">&times;</span>
+            <h2 class="text-2xl font-bold mb-4">智能纠错</h2>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">请输入需要检查的文本:</label>
+                <textarea id="correctText" class="w-full p-2 border border-gray-300 rounded-lg" rows="6" placeholder="请粘贴需要检查的会议记录或材料..."></textarea>
+            </div>
+            <button onclick="correctText()" class="w-full bg-red-600 text-white font-semibold rounded-lg py-2 hover:bg-red-700 transition-colors">
+                开始纠错
+            </button>
+            <div id="correctResult" class="mt-4 p-4 bg-gray-50 rounded-lg" style="display:none;">
+                <h3 class="font-semibold mb-2">纠错结果:</h3>
+                <div id="correctContent" class="whitespace-pre-wrap"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 日历模态框 -->
+    <div id="calendarModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('calendarModal')">&times;</span>
+            <h2 class="text-2xl font-bold mb-4">党建日历</h2>
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <button onclick="changeMonth(-1)" class="px-3 py-1 bg-gray-200 rounded">&lt;</button>
+                    <h3 id="currentMonth" class="text-lg font-semibold"></h3>
+                    <button onclick="changeMonth(1)" class="px-3 py-1 bg-gray-200 rounded">&gt;</button>
+                </div>
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar will be generated here -->
+                </div>
+            </div>
+            <div class="mb-4">
+                <h4 class="font-semibold mb-2">添加事件:</h4>
+                <input type="date" id="eventDate" class="w-full p-2 border border-gray-300 rounded-lg mb-2">
+                <input type="text" id="eventTitle" class="w-full p-2 border border-gray-300 rounded-lg mb-2" placeholder="事件标题">
+                <textarea id="eventDesc" class="w-full p-2 border border-gray-300 rounded-lg" rows="2" placeholder="事件描述"></textarea>
+                <button onclick="addEvent()" class="w-full mt-2 bg-red-600 text-white font-semibold rounded-lg py-2 hover:bg-red-700 transition-colors">
+                    添加事件
+                </button>
+            </div>
+            <div id="eventsList" class="mt-4">
+                <h4 class="font-semibold mb-2">即将到来的事件:</h4>
+                <div id="upcomingEvents"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API配置 - 优化速度版本
+        const API_KEY = 'sk-kyuhswemmhnjlftcwwbdxoudivvxiqhfackqaxrrkwrmllyl';
+        const API_URL = 'https://api.siliconflow.cn/v1/chat/completions';
+        const MODEL_NAME = 'deepseek-ai/DeepSeek-R1-0528-Qwen3-8B';
+        const REQUEST_TIMEOUT = 15000; // 15秒超时
+
+        // 全局变量
+        let chatHistory = [];
+        let currentDate = new Date();
+        let events = JSON.parse(localStorage.getItem('partyEvents') || '[]');
+        let stats = JSON.parse(localStorage.getItem('partyStats') || '{"qa": 0, "material": 0, "correct": 0}');
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            setupEventListeners();
+            loadChatHistory();
+        });
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            document.getElementById('askButton').addEventListener('click', askQuestion);
+            document.getElementById('userInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') askQuestion();
+            });
+            document.getElementById('clearHistory').addEventListener('click', clearChatHistory);
+            document.getElementById('qaButton').addEventListener('click', () => focusInput());
+            document.getElementById('materialButton').addEventListener('click', () => openModal('materialModal'));
+            document.getElementById('correctButton').addEventListener('click', () => openModal('correctModal'));
+            document.getElementById('calendarButton').addEventListener('click', () => {
+                openModal('calendarModal');
+                generateCalendar();
+            });
+        }
+
+        // AI问答功能
+        async function askQuestion() {
+            const input = document.getElementById('userInput');
+            const question = input.value.trim();
+            if (!question) return;
+
+            // 添加用户消息到聊天历史
+            addMessageToChat('user', question);
+            input.value = '';
+
+            // 显示加载状态
+            const loadingId = addMessageToChat('ai', '<div class="loading"></div>');
+
+            try {
+                // 创建带超时的fetch请求
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+                
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: MODEL_NAME,
+                        messages: [
+                            {
+                                role: 'system',
+                                content: '简洁回答，控制在100字内。'
+                            },
+                            {
+                                role: 'user',
+                                content: question
+                            }
+                        ],
+                        max_tokens: 300,
+                        temperature: 0.3,
+                        stream: false
+                    }),
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`API请求失败: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const answer = data.choices[0].message.content;
+
+                // 更新加载消息为实际回答
+                updateMessageInChat(loadingId, answer);
+                
+                // 更新统计
+                stats.qa++;
+                updateStats();
+                saveChatHistory();
+
+            } catch (error) {
+                console.error('API调用错误:', error);
+                if (error.name === 'AbortError') {
+                    updateMessageInChat(loadingId, '请求超时，请重试或简化问题。');
+                } else {
+                    updateMessageInChat(loadingId, '抱歉，AI服务暂时不可用，请稍后再试。');
+                }
+                document.getElementById('connectionStatus').textContent = '异常';
+                document.getElementById('connectionStatus').className = 'text-red-600 font-semibold';
+            }
+        }
+
+        // 添加消息到聊天
+        function addMessageToChat(sender, message) {
+            const chatHistory = document.getElementById('chatHistory');
+            const messageId = 'msg_' + Date.now();
+            const messageDiv = document.createElement('div');
+            messageDiv.id = messageId;
+            messageDiv.className = `chat-message ${sender === 'user' ? 'user-message' : 'ai-message'}`;
+            messageDiv.innerHTML = `
+                <div class="font-semibold mb-1">${sender === 'user' ? '您' : 'AI助理'}</div>
+                <div>${message}</div>
+            `;
+            chatHistory.appendChild(messageDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+            return messageId;
+        }
+
+        // 更新聊天消息
+        function updateMessageInChat(messageId, newContent) {
+            const messageDiv = document.getElementById(messageId);
+            if (messageDiv) {
+                const contentDiv = messageDiv.querySelector('div:last-child');
+                contentDiv.innerHTML = newContent;
+            }
+        }
+
+        // 清除聊天历史
+        function clearChatHistory() {
+            document.getElementById('chatHistory').innerHTML = '';
+            chatHistory = [];
+            localStorage.removeItem('partyChatHistory');
+        }
+
+        // 保存聊天历史
+        function saveChatHistory() {
+            localStorage.setItem('partyChatHistory', JSON.stringify(chatHistory));
+            localStorage.setItem('partyStats', JSON.stringify(stats));
+        }
+
+        // 加载聊天历史
+        function loadChatHistory() {
+            const saved = localStorage.getItem('partyChatHistory');
+            if (saved) {
+                chatHistory = JSON.parse(saved);
+                chatHistory.forEach(msg => {
+                    addMessageToChat(msg.sender, msg.content);
+                });
+            }
+        }
+
+        // 材料生成功能
+        async function generateMaterial() {
+            const type = document.getElementById('materialType').value;
+            const topic = document.getElementById('materialTopic').value.trim();
+            if (!topic) {
+                alert('请输入材料主题');
+                return;
+            }
+
+            const typeMap = {
+                'speech': '发言稿',
+                'summary': '心得体会',
+                'report': '工作报告',
+                'plan': '学习计划'
+            };
+
+            const prompt = `请帮我生成一份${typeMap[type]}，主题是：${topic}。请确保内容专业、结构清晰、符合党建工作要求。`;
+
+            document.getElementById('materialResult').style.display = 'block';
+            document.getElementById('materialContent').innerHTML = '<div class="loading"></div>';
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: MODEL_NAME,
+                        messages: [
+                            {
+                                role: 'system',
+                                content: '你是一个专业的党建材料写作助手，擅长生成各类党建文稿。请确保内容政治正确、结构完整、语言规范。'
+                            },
+                            {
+                                role: 'user',
+                                content: prompt
+                            }
+                        ],
+                        temperature: 0.3,
+                        max_tokens: 500
+                    })
+                });
+
+                const data = await response.json();
+                const content = data.choices[0].message.content;
+                document.getElementById('materialContent').innerHTML = content;
+                
+                stats.material++;
+                updateStats();
+
+            } catch (error) {
+                console.error('材料生成错误:', error);
+                document.getElementById('materialContent').innerHTML = '材料生成失败，请稍后再试。';
+            }
+        }
+
+        // 智能纠错功能
+        async function correctText() {
+            const text = document.getElementById('correctText').value.trim();
+            if (!text) {
+                alert('请输入需要检查的文本');
+                return;
+            }
+
+            const prompt = `请帮我检查以下文本中的错别字、语法错误、逻辑问题和用语不当之处，并提供修改建议：\n\n${text}`;
+
+            document.getElementById('correctResult').style.display = 'block';
+            document.getElementById('correctContent').innerHTML = '<div class="loading"></div>';
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: MODEL_NAME,
+                        messages: [
+                            {
+                                role: 'system',
+                                content: '你是一个专业的文本校对助手，擅长发现和纠正各类文本错误，包括错别字、语法错误、逻辑问题和用语不当。请提供详细的修改建议。'
+                            },
+                            {
+                                role: 'user',
+                                content: prompt
+                            }
+                        ],
+                        temperature: 0.3,
+                        max_tokens: 400
+                    })
+                });
+
+                const data = await response.json();
+                const content = data.choices[0].message.content;
+                document.getElementById('correctContent').innerHTML = content;
+                
+                stats.correct++;
+                updateStats();
+
+            } catch (error) {
+                console.error('纠错功能错误:', error);
+                document.getElementById('correctContent').innerHTML = '纠错功能暂时不可用，请稍后再试。';
+            }
+        }
+
+        // 日历功能
+        function generateCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            document.getElementById('currentMonth').textContent = `${year}年${month + 1}月`;
+
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = '';
+
+            // 添加星期标题
+            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+            weekdays.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day font-semibold text-center bg-gray-100';
+                dayHeader.textContent = day;
+                calendarGrid.appendChild(dayHeader);
+            });
+
+            // 添加空白天数
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day bg-gray-50';
+                calendarGrid.appendChild(emptyDay);
+            }
+
+            // 添加月份天数
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                dayDiv.innerHTML = `<div class="font-semibold">${day}</div>`;
+                
+                // 检查是否有事件
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayEvents = events.filter(event => event.date === dateStr);
+                if (dayEvents.length > 0) {
+                    dayDiv.classList.add('has-event');
+                    dayEvents.forEach(event => {
+                        const eventDot = document.createElement('div');
+                        eventDot.className = 'event-dot';
+                        eventDot.title = event.title;
+                        dayDiv.appendChild(eventDot);
+                    });
+                }
+                
+                calendarGrid.appendChild(dayDiv);
+            }
+
+            updateUpcomingEvents();
+        }
+
+        function changeMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            generateCalendar();
+        }
+
+        function addEvent() {
+            const date = document.getElementById('eventDate').value;
+            const title = document.getElementById('eventTitle').value.trim();
+            const desc = document.getElementById('eventDesc').value.trim();
+
+            if (!date || !title) {
+                alert('请填写日期和标题');
+                return;
+            }
+
+            const event = {
+                id: Date.now(),
+                date: date,
+                title: title,
+                description: desc
+            };
+
+            events.push(event);
+            localStorage.setItem('partyEvents', JSON.stringify(events));
+            
+            // 清空表单
+            document.getElementById('eventDate').value = '';
+            document.getElementById('eventTitle').value = '';
+            document.getElementById('eventDesc').value = '';
+            
+            generateCalendar();
+            alert('事件添加成功！');
+        }
+
+        function updateUpcomingEvents() {
+            const today = new Date();
+            const upcoming = events
+                .filter(event => new Date(event.date) >= today)
+                .sort((a, b) => new Date(a.date) - new Date(b.date))
+                .slice(0, 5);
+
+            const container = document.getElementById('upcomingEvents');
+            if (upcoming.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">暂无即将到来的事件</p>';
+                return;
+            }
+
+            container.innerHTML = upcoming.map(event => `
+                <div class="bg-white border rounded-lg p-3 mb-2">
+                    <div class="font-semibold">${event.title}</div>
+                    <div class="text-sm text-gray-600">${event.date}</div>
+                    ${event.description ? `<div class="text-sm text-gray-500 mt-1">${event.description}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // 模态框控制
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // 聚焦输入框
+        function focusInput() {
+            document.getElementById('userInput').focus();
+        }
+
+        // 更新统计数据
+        function updateStats() {
+            document.getElementById('todayQA').textContent = stats.qa;
+            document.getElementById('todayMaterial').textContent = stats.material;
+            document.getElementById('todayCorrect').textContent = stats.correct;
+        }
+    </script>
+
+</body>
+</html>

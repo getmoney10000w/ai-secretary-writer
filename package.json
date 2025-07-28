@@ -1,0 +1,21 @@
+{
+  "name": "party-ai-assistant",
+  "version": "1.0.0",
+  "description": "党建工作AI智能小助理",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve -s .",
+    "build": "echo 'No build step required'"
+  },
+  "keywords": [
+    "ai",
+    "party",
+    "assistant",
+    "党建"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.0.0"
+  }
+}
