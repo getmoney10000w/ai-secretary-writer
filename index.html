@@ -33,15 +33,14 @@
         .chat-container::-webkit-scrollbar { width: 6px; }
         .chat-container::-webkit-scrollbar-thumb { background-color: #4b5563; border-radius: 3px; }
         
-        /* Chat Bubble Styling */
         .chat-message {
             padding: 0.75rem 1rem;
             border-radius: 0.75rem;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            max-width: 90%; /* Max width for long messages */
+            max-width: 90%;
             width: -moz-fit-content;
-            width: fit-content; /* Make bubble wrap content */
-            word-wrap: break-word; /* Break long words */
+            width: fit-content;
+            word-wrap: break-word;
         }
         .user-message {
             background-color: var(--user-msg-bg);
@@ -51,6 +50,23 @@
             background-color: var(--ai-msg-bg);
             align-self: flex-start;
             border: 1px solid #e5e7eb;
+        }
+        .prose {
+            max-width: none;
+        }
+        .prose p, .prose ul, .prose ol {
+            margin-top: 0.5em;
+            margin-bottom: 0.5em;
+        }
+        .prose pre {
+            background-color: #1f2937;
+            color: #d1d5db;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+        }
+        .prose code {
+            color: #d1d5db;
         }
 
         .loading-dots span {
@@ -100,34 +116,33 @@
         <!-- Main Sidebar -->
         <aside id="sidebar" class="w-64 text-gray-800 flex-col flex-shrink-0 flex border-r border-gray-200">
              <div class="p-4 border-b border-gray-200 flex items-center justify-center">
-                <h1 class="text-lg font-semibold">文秘AI助理</h1>
-            </div>
-            <div class="flex-1 p-2 space-y-1 overflow-y-auto">
+                 <h1 class="text-lg font-semibold">文秘AI助理</h1>
+             </div>
+             <div class="flex-1 p-2 space-y-1 overflow-y-auto">
                  <div class="flex justify-between items-center px-1 py-1 text-xs text-gray-500">
-                    <span class="font-semibold">最近对话</span>
-                    <button id="collapseHistoryBtn" class="p-1 rounded-full hover:bg-gray-200">
-                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                    </button>
-                </div>
-                <nav id="chatHistoryList" class="space-y-1">
-                    <!-- Chat history will be populated here -->
-                </nav>
-            </div>
-            <div class="p-2 border-t border-gray-200 space-y-1">
+                     <span class="font-semibold">最近对话</span>
+                     <button id="collapseHistoryBtn" class="p-1 rounded-full hover:bg-gray-200">
+                         <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                     </button>
+                 </div>
+                 <nav id="chatHistoryList" class="space-y-1">
+                     <!-- Chat history will be populated here -->
+                 </nav>
+             </div>
+             <div class="p-2 border-t border-gray-200 space-y-1">
                  <a href="#" id="calendarButton" class="flex items-center px-3 py-2 text-sm rounded-md hover:bg-gray-200">
-                    <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                    工作日历
-                </a>
+                     <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                     工作日历
+                 </a>
                  <a href="#" id="clearHistory" class="flex items-center px-3 py-2 text-sm rounded-md hover:bg-gray-200">
-                    <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                    清除所有对话
-                </a>
-            </div>
+                     <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                     清除所有对话
+                 </a>
+             </div>
         </aside>
 
         <!-- Main Content -->
         <main class="flex-1 flex flex-col bg-gray-50 relative">
-            <!-- Centered Content Wrapper -->
             <div class="w-full h-full flex flex-col max-w-4xl mx-auto">
                 <!-- Chat Area -->
                 <div id="chatHistory" class="chat-container flex-1 p-6 overflow-y-auto flex flex-col space-y-4">
@@ -152,11 +167,10 @@
                             </button>
                             <button class="p-4 border rounded-lg hover:bg-gray-100 text-left" onclick="setMode('reminder')">
                                 <h3 class="font-semibold">⏰ 智能提醒</h3>
-                                <p class="text-sm text-gray-500">固定格式：今天/明天 HH:MM 内容 或 MM-DD HH:MM 内容</p>
+                                <p class="text-sm text-gray-500">能理解日常用语来设置提醒</p>
                             </button>
                         </div>
                     </div>
-                    <!-- Chat messages will be appended here -->
                 </div>
 
                 <!-- Mode Info Bar -->
@@ -191,22 +205,18 @@
             <span class="close" onclick="closeCalendar()">&times;</span>
             <h2 class="text-xl font-bold mb-4">工作日历</h2>
             <div class="flex flex-col md:flex-row gap-4">
-                <!-- Calendar Grid -->
                 <div class="flex-1">
                      <div class="flex items-center justify-between mb-2">
-                        <button onclick="changeMonth(-1)" class="p-2 rounded-full hover:bg-gray-200">
-                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-                        </button>
-                        <h3 id="calendarHeader" class="text-lg font-semibold"></h3>
-                        <button onclick="changeMonth(1)" class="p-2 rounded-full hover:bg-gray-200">
-                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                        </button>
+                         <button onclick="changeMonth(-1)" class="p-2 rounded-full hover:bg-gray-200">
+                             <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                         </button>
+                         <h3 id="calendarHeader" class="text-lg font-semibold"></h3>
+                         <button onclick="changeMonth(1)" class="p-2 rounded-full hover:bg-gray-200">
+                             <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                         </button>
                      </div>
-                     <div id="calendar" class="calendar-grid">
-                        <!-- Calendar will be generated here -->
-                    </div>
+                     <div id="calendar" class="calendar-grid"></div>
                 </div>
-                <!-- Events & Add Form -->
                 <div class="w-full md:w-1/3">
                     <h3 class="font-semibold mb-2">添加新事件</h3>
                     <div class="flex flex-col gap-2 mb-4">
@@ -217,9 +227,7 @@
                     </div>
                     <hr class="my-4">
                     <h3 class="font-semibold mb-2">事件列表</h3>
-                    <div id="modalEventsList" class="max-h-60 overflow-y-auto">
-                        <!-- Events will be listed here -->
-                    </div>
+                    <div id="modalEventsList" class="max-h-60 overflow-y-auto"></div>
                 </div>
             </div>
         </div>
@@ -234,18 +242,8 @@
         // --- CONFIGURATION ---
         const API_KEY = 'sk-kyuhswemmhnjlftcwwbdxoudivvxiqhfackqaxrrkwrmllyl';
         const API_URL = 'https://api.siliconflow.cn/v1/chat/completions';
-        let MODEL_NAME = 'Qwen/Qwen3-8B';
+        let MODEL_NAME = 'Qwen/Qwen2.5-7B-Instruct';
         
-        // Available models
-        const AVAILABLE_MODELS = [
-            'Qwen/Qwen2.5-7B-Instruct',
-            'Qwen/Qwen2.5-14B-Instruct',
-            'Qwen/Qwen2.5-32B-Instruct',
-            'deepseek-ai/DeepSeek-V2.5',
-            'meta-llama/Meta-Llama-3.1-8B-Instruct',
-            'meta-llama/Meta-Llama-3.1-70B-Instruct'
-        ];
-
         // --- GLOBAL STATE ---
         let sessions = [];
         let activeSessionId = null;
@@ -277,13 +275,14 @@
             loadingElements.forEach(element => {
                 const messageDiv = element.closest('.chat-message');
                 if (messageDiv && messageDiv.parentNode) {
-                    messageDiv.parentNode.removeChild(messageDiv);
+                    const wrapper = messageDiv.closest('.flex.w-full');
+                    if(wrapper) wrapper.remove();
+                    else messageDiv.remove();
                 }
             });
         }
 
         function smartScrollToBottom() {
-            // 检查用户是否接近底部（容差50px）
             const isNearBottom = chatHistoryContainer.scrollTop + chatHistoryContainer.clientHeight >= chatHistoryContainer.scrollHeight - 50;
             if (isNearBottom) {
                 chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
@@ -302,27 +301,28 @@
         function renderChatList() {
             if (!chatHistoryList) return;
             chatHistoryList.innerHTML = '';
-            sessions.forEach(session => {
+            const sortedSessions = [...sessions].sort((a, b) => {
+                const lastMsgA = a.messages[a.messages.length - 1]?.id || a.id;
+                const lastMsgB = b.messages[b.messages.length - 1]?.id || b.id;
+                return lastMsgB - lastMsgA;
+            });
+
+            sortedSessions.forEach(session => {
                 const a = document.createElement('a');
                 a.href = '#';
+                a.dataset.sessionId = session.id;
                 a.className = 'flex flex-col px-3 py-2 text-sm rounded-md hover:bg-gray-200';
                 if (session.id === activeSessionId) {
                     a.classList.add('active');
                 }
                 
-                // Create title element
                 const titleDiv = document.createElement('div');
                 titleDiv.className = 'truncate font-medium';
                 titleDiv.textContent = session.title || '新对话';
                 a.appendChild(titleDiv);
                 
-                // Create mode info element
                 if (session.mode) {
-                    const modeNames = {
-                        'qa': '智能问答',
-                        'material': '材料生成',
-                        'correct': '智能纠错'
-                    };
+                    const modeNames = { 'qa': '智能问答', 'material': '材料生成', 'correct': '智能纠错', 'reminder': '智能提醒' };
                     const modeDiv = document.createElement('div');
                     modeDiv.className = 'text-xs text-gray-500 truncate';
                     modeDiv.textContent = modeNames[session.mode] || session.mode;
@@ -333,7 +333,7 @@
                     e.preventDefault();
                     loadChat(session.id);
                 };
-                chatHistoryList.prepend(a);
+                chatHistoryList.appendChild(a);
             });
         }
 
@@ -346,12 +346,7 @@
             userInput.placeholder = "请先选择一个模式...";
             document.querySelectorAll('#modeSelection button').forEach(btn => btn.classList.remove('bg-red-100', 'border-red-500'));
             
-            // Hide mode info bar
-            const modeInfoBar = document.getElementById('modeInfoBar');
-            if (modeInfoBar) {
-                modeInfoBar.style.display = 'none';
-            }
-            
+            document.getElementById('modeInfoBar').style.display = 'none';
             renderChatList();
         }
         
@@ -364,7 +359,6 @@
                 selectedBtn.classList.add('bg-red-100', 'border-red-500');
             }
             
-            // Update mode info bar
             const modeInfoBar = document.getElementById('modeInfoBar');
             const currentModeDisplay = document.getElementById('currentModeDisplay');
             const modeDescription = document.getElementById('modeDescription');
@@ -378,9 +372,8 @@
                 modeInfoBar.style.display = 'block';
             }
             
-            // 智能提醒模式特殊处理
             if (mode === 'reminder') {
-                // 显示通知权限状态
+                userInput.placeholder = "例如：提醒我明天下午3点开会";
                 const permissionStatus = Notification.permission;
                 let statusMessage = '';
                 let statusColor = '';
@@ -396,14 +389,13 @@
                     statusColor = 'text-yellow-600';
                 }
                 
-                // 在模式描述下方添加权限状态
                 if (modeDescription) {
-                    modeDescription.innerHTML = `设置日程提醒和通知<br><span class="${statusColor} text-sm">${statusMessage}</span>`;
+                    modeDescription.innerHTML = `用自然语言设置提醒<br><span class="${statusColor} text-sm">${statusMessage}</span>`;
                 }
+            } else {
+                 userInput.placeholder = `已选择${selectedBtn.querySelector('h3').textContent}模式，开始提问...`;
             }
-            
             userInput.focus();
-            userInput.placeholder = `已选择${selectedBtn.querySelector('h3').textContent}模式，开始提问...`;
         }
 
         function loadChat(sessionId) {
@@ -416,7 +408,6 @@
                 addMessageToChat(msg.content, msg.role === 'user', msg.id);
             });
             
-            // Update mode info bar for existing session
             const modeInfoBar = document.getElementById('modeInfoBar');
             const currentModeDisplay = document.getElementById('currentModeDisplay');
             const modeDescription = document.getElementById('modeDescription');
@@ -426,7 +417,7 @@
                     'qa': { name: '智能问答', desc: '解答办公、会议等问题' },
                     'material': { name: '材料生成', desc: '撰写公文、报告、总结' },
                     'correct': { name: '智能纠错', desc: '校对错别字、语法、格式' },
-                    'reminder': { name: '⏰ 智能提醒', desc: '固定格式输入：今天/明天/后天 HH:MM 内容 | MM-DD HH:MM 内容 | YYYY-MM-DD HH:MM 内容' }
+                    'reminder': { name: '⏰ 智能提醒', desc: '用自然语言设置提醒' }
                 };
                 
                 const modeInfo = modeNames[session.mode];
@@ -438,50 +429,26 @@
             }
             
             renderChatList();
+            chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
         }
 
-        function addMessageToChat(content, isUser, messageId, useTypewriter = false) {
+        function addMessageToChat(content, isUser, messageId) {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.className = `flex w-full ${isUser ? 'justify-end' : 'justify-start'}`;
+
             const messageDiv = document.createElement('div');
             messageDiv.className = `chat-message ${isUser ? 'user-message' : 'ai-message'}`;
             messageDiv.dataset.messageId = messageId;
             
-            if (isUser || !useTypewriter) {
-                const parsedContent = isUser ? content.replace(/\n/g, '<br>') : marked.parse(content);
-                messageDiv.innerHTML = `<div>${parsedContent}</div>`;
-                chatHistoryContainer.appendChild(messageDiv);
-                chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
-            } else {
-                // AI message with typewriter effect
-                const contentDiv = document.createElement('div');
-                messageDiv.appendChild(contentDiv);
-                chatHistoryContainer.appendChild(messageDiv);
-                
-                // Start typewriter effect
-                typewriterEffect(contentDiv, content);
-            }
+            const parsedContent = marked.parse(content || '...');
+            messageDiv.innerHTML = `<div class="prose max-w-none prose-p:my-2 prose-ul:my-2 prose-ol:my-2">${parsedContent}</div>`;
+            
+            messageWrapper.appendChild(messageDiv);
+            chatHistoryContainer.appendChild(messageWrapper);
+            smartScrollToBottom();
+            return messageDiv;
         }
         
-        function typewriterEffect(element, text, speed = 30) {
-            let index = 0;
-            let currentText = '';
-            
-            function typeNextChar() {
-                if (index < text.length) {
-                    currentText += text[index];
-                    // Parse markdown for each update to maintain formatting
-                    element.innerHTML = marked.parse(currentText);
-                    index++;
-                    
-                    // Auto-scroll to bottom
-                    chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
-                    
-                    setTimeout(typeNextChar, speed);
-                }
-            }
-            
-            typeNextChar();
-        }
-
         async function sendMessage() {
             if (isLoading) return;
             const message = userInput.value.trim();
@@ -506,241 +473,170 @@
                 const newSessionId = Date.now().toString();
                 currentSession = {
                     id: newSessionId,
-                    title: message.substring(0, 30),
+                    title: message.substring(0, 20),
                     mode: currentNewChatMode,
                     messages: [userMessage]
                 };
                 sessions.push(currentSession);
                 activeSessionId = newSessionId;
-                renderChatList();
             } else {
                 currentSession = sessions.find(s => s.id === activeSessionId);
                 currentSession.messages.push(userMessage);
             }
 
             addMessageToChat(userMessage.content, true, userMessage.id);
+            renderChatList();
             saveSessions();
             
             isLoading = true;
             askButton.disabled = true;
 
+            const loadingWrapper = document.createElement('div');
+            loadingWrapper.className = 'flex w-full justify-start';
             const loadingDiv = document.createElement('div');
             loadingDiv.className = 'chat-message ai-message';
             loadingDiv.innerHTML = `<div class="loading-dots"><span></span><span></span><span></span></div>`;
-            chatHistoryContainer.appendChild(loadingDiv);
+            loadingWrapper.appendChild(loadingDiv);
+            chatHistoryContainer.appendChild(loadingWrapper);
             chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
 
             try {
-                let systemPrompt = '';
-                switch (currentSession.mode) {
-                    case 'qa': 
-                        systemPrompt = `你是一个专业的文秘工作智能助理，专门负责解答办公、会议、行政管理等相关问题。
-
-你的职责包括：
-1. 解答办公流程、制度规范、工作安排等问题
-2. 提供会议组织、接待礼仪、公文处理等专业建议
-3. 协助解决日常行政事务和工作协调问题
-4. 提供时间管理、效率提升等工作方法指导
-
-回答要求：
-- 准确专业，基于文秘工作实践
-- 条理清晰，便于理解和执行
-- 提供具体可操作的建议
-- 语言正式但亲和，符合办公环境`;
-                        break;
-                    case 'material': 
-                        systemPrompt = `你是一个专业的文秘材料生成助理，擅长撰写各类公文、报告、总结等办公文档。
-
-你的专长包括：
-1. 公文写作：通知、通报、请示、报告、函件等
-2. 工作总结：月度、季度、年度工作总结
-3. 计划方案：工作计划、活动方案、实施细则
-4. 会议文档：会议纪要、发言稿、汇报材料
-5. 其他文档：制度规范、操作手册、宣传材料
-
-写作要求：
-- 格式规范，符合公文标准
-- 内容充实，逻辑清晰
-- 语言准确，表达得体
-- 结构完整，要素齐全
-- 根据具体需求调整文风和详细程度`;
-                        break;
-                    case 'correct': 
-                        systemPrompt = `你是一个专业的文档校对助理，专门负责检查和纠正各类文档中的错误。
-
-你的校对范围：
-1. 错别字检查：识别并纠正错误的汉字
-2. 语法错误：修正语法结构、句式问题
-3. 标点符号：规范标点使用，确保准确性
-4. 格式规范：检查文档格式、排版问题
-5. 逻辑表达：优化语言表达，提升文档质量
-6. 专业术语：确保专业词汇使用准确
-
-校对原则：
-- 保持原文意思不变
-- 提供具体的修改建议
-- 说明修改理由
-- 标注修改位置
-- 区分错误类型（错别字/语法/格式等）
-- 提供修改前后对比`;
-                        break;
-                    case 'reminder':
-                        systemPrompt = `你是一个简洁高效的闹钟提醒助理。
-
-**固定格式说明：**
-请使用以下标准格式设置提醒：
-格式：日期 时间 提醒内容
-
-**支持的日期格式：**
-- 今天、明天、后天
-- MM-DD（如：01-15）
-- YYYY-MM-DD（如：2025-01-15）
-
-**时间格式（24小时制）：**
-- HH:MM（如：09:30、14:00、20:15）
-
-**示例：**
-- "明天 09:30 开会"
-- "01-15 14:00 项目汇报"
-- "2025-02-01 10:00 年会准备"
-
-**回复要求：**
-- 如果格式正确，直接确认并创建提醒
-- 如果格式错误，提供正确格式示例
-- 保持回复简洁，避免冗长解释
-- 不要进行复杂的自然语言解析
-
-请严格按照上述格式处理用户输入。`;
-                        break;
-                    default: 
-                        systemPrompt = `你是一个专业的文秘工作智能助理，能够协助处理各类办公事务。
-
-主要功能：
-1. 智能问答：解答办公、会议、行政管理问题
-2. 材料生成：撰写公文、报告、总结等文档
-3. 智能纠错：校对文档错误，优化表达
-4. 智能提醒：设置日程提醒和通知
-
-工作原则：
-- 专业准确，服务高效
-- 格式规范，内容充实
-- 语言得体，表达清晰`;
-                }
-
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
-                    body: JSON.stringify({
-                        model: MODEL_NAME,
-                        messages: [{ role: 'system', content: systemPrompt }, ...currentSession.messages.slice(-10).map(m => ({role: m.role, content: m.content}))], // API doesn't need ID
-                        temperature: 0.7,
-                        max_tokens: 2000,
-                        stream: true  // 启用流式传输
-                    })
-                });
-
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
-                // 流式处理响应
-                let aiResponseContent = '';
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-                
-                // 创建AI消息容器
-                const aiMessage = {
-                    id: generateId(),
-                    role: 'assistant',
-                    content: '',
-                    timestamp: new Date().toISOString()
-                };
-                
-                let hasReceivedContent = false;
-                let messageElement = null;
-                
-                // 流式读取和显示
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    
-                    const chunk = decoder.decode(value);
-                    const lines = chunk.split('\n');
-                    
-                    for (const line of lines) {
-                        if (line.startsWith('data: ')) {
-                            const data = line.slice(6);
-                            if (data === '[DONE]') continue;
-                            
-                            try {
-                                const parsed = JSON.parse(data);
-                                const content = parsed.choices[0]?.delta?.content || '';
-                                if (content) {
-                                    // 首次接收到内容时创建AI消息框并移除加载动画
-                                    if (!hasReceivedContent) {
-                                        removeLoadingMessage();
-                                        addMessageToChat('', false, aiMessage.id, false);
-                                        messageElement = document.querySelector(`[data-message-id="${aiMessage.id}"] div`);
-                                        hasReceivedContent = true;
-                                    }
-                                    aiResponseContent += content;
-                                    aiMessage.content = aiResponseContent;
-                                    // 实时更新显示内容
-                                    messageElement.innerHTML = marked.parse(aiResponseContent);
-                                    // 智能滚动到底部（只有用户在底部时才滚动）
-                                    smartScrollToBottom();
-                                }
-                            } catch (e) {
-                                // 忽略JSON解析错误
-                            }
-                        }
-                    }
-                }
-                
-                // 智能提醒模式特殊处理
                 if (currentSession.mode === 'reminder') {
-                    const parsed = SimpleTimeParser.parseFixedFormat(userMessage.content);
-                    const notificationPermission = Notification.permission;
+                    const reminderParserPrompt = `
+                        You are a reminder parsing assistant. Your task is to extract the date, time, and content from the user's natural language input.
+                        The current time is: ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}.
+                        You must return a JSON object with the following structure:
+                        {
+                          "dateTime": "YYYY-MM-DDTHH:mm:ss",
+                          "content": "the reminder content"
+                        }
+                        If you cannot determine a specific future time, return:
+                        {
+                          "error": "无法确定具体时间，请让用户说得更详细一些。"
+                        }
+                        Now parse the following user input: "${message}"
+                    `;
+
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
+                        body: JSON.stringify({
+                            model: MODEL_NAME,
+                            messages: [{ role: 'system', content: reminderParserPrompt }],
+                            temperature: 0,
+                            response_format: { type: "json_object" }
+                        })
+                    });
+
+                    if (!response.ok) throw new Error(`API error: ${response.statusText}`);
                     
-                    if (parsed.isValid) {
-                        try {
-                            const reminder = ReminderManager.createReminder(parsed.content, parsed.dateTime);
-                            const dateStr = parsed.dateTime.toLocaleDateString('zh-CN');
-                            const timeStr = parsed.dateTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-                            const now = new Date();
-                            const delay = Math.round((parsed.dateTime - now) / 1000 / 60); // 分钟
-                            
-                            let notificationStatus = '';
-                            if (notificationPermission === 'granted') {
-                                notificationStatus = '✅ 通知已授权';
-                            } else if (notificationPermission === 'denied') {
-                                notificationStatus = '❌ 通知被拒绝';
-                            } else {
-                                notificationStatus = '⚠️ 通知待授权';
+                    const parsedResponse = await response.json();
+                    const aiContent = parsedResponse.choices[0].message.content;
+                    let aiResponseForDisplay = '';
+                    
+                    try {
+                        const reminderData = JSON.parse(aiContent);
+                        if (reminderData.error) {
+                            aiResponseForDisplay = reminderData.error;
+                        } else {
+                            const reminderTime = new Date(reminderData.dateTime);
+                            if (isNaN(reminderTime.getTime())) {
+                                throw new Error("Invalid date format from API.");
                             }
+                            const event = {
+                                id: Date.now(),
+                                date: reminderData.dateTime.split('T')[0],
+                                time: reminderData.dateTime.split('T')[1].substring(0, 5),
+                                text: reminderData.content,
+                                dateTime: reminderTime.getTime(),
+                                notified: false,
+                                type: 'reminder'
+                            };
                             
-                            const reminderInfo = `\n\n✅ **提醒创建成功**\n📅 ${dateStr} ${timeStr}\n📝 ${parsed.content}\n⏰ ${delay > 0 ? delay + '分钟后提醒' : '时间已过'}\n🔔 ${notificationStatus}`;
-                            aiResponseContent += reminderInfo;
-                            aiMessage.content = aiResponseContent;
-                            // 更新显示内容
-                            messageElement.innerHTML = marked.parse(aiResponseContent);
-                        } catch (error) {
-                            console.error('创建提醒失败:', error);
-                            const errorInfo = `\n\n❌ 提醒创建失败：${error.message}`;
-                            aiResponseContent += errorInfo;
-                            aiMessage.content = aiResponseContent;
-                            // 更新显示内容
-                            messageElement.innerHTML = marked.parse(aiResponseContent);
+                            let events = JSON.parse(localStorage.getItem('secretaryEvents') || '[]');
+                            events.push(event);
+                            localStorage.setItem('secretaryEvents', JSON.stringify(events));
+                            scheduleNotification(event);
+
+                            aiResponseForDisplay = `好的，已为您设置提醒：\n- **时间**: ${reminderTime.toLocaleString('zh-CN')}\n- **内容**: ${reminderData.content}`;
+                        }
+                    } catch (e) {
+                         console.error("Error parsing reminder JSON or creating event:", e);
+                         aiResponseForDisplay = "抱歉，解析您的提醒时出错了，请换一种方式试试。";
+                    }
+
+                    removeLoadingMessage();
+                    const aiMessage = { id: generateId(), role: 'assistant', content: aiResponseForDisplay };
+                    addMessageToChat(aiResponseForDisplay, false, aiMessage.id);
+                    currentSession.messages.push(aiMessage);
+                    
+                } else {
+                    let systemPrompt = '你是一个专业的文秘工作智能助理...';
+                    switch (currentSession.mode) {
+                         case 'qa': systemPrompt = `你是一个专业的文秘工作智能助理，专门负责解答办公、会议、行政管理等相关问题。请专业、条理清晰地回答。`; break;
+                         case 'material': systemPrompt = `你是一个专业的文秘材料生成助理，擅长撰写各类公文、报告、总结等办公文档。请确保格式规范、内容充实。`; break;
+                         case 'correct': systemPrompt = `你是一个专业的文档校对助理，专门负责检查和纠正各类文档中的错误。请提供修改前后对比和修改理由。`; break;
+                    }
+
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
+                        body: JSON.stringify({
+                            model: MODEL_NAME,
+                            messages: [{ role: 'system', content: systemPrompt }, ...currentSession.messages.slice(-10).map(m => ({role: m.role, content: m.content}))],
+                            temperature: 0.7,
+                            stream: true
+                        })
+                    });
+
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    removeLoadingMessage();
+                    const aiMessageId = generateId();
+                    const aiMessageElement = addMessageToChat('', false, aiMessageId);
+                    const contentDiv = aiMessageElement.querySelector('.prose');
+
+                    let aiResponseContent = '';
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        
+                        const chunk = decoder.decode(value, {stream: true});
+                        const lines = chunk.split('\n');
+                        
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                const data = line.slice(6);
+                                if (data.trim() === '[DONE]') continue;
+                                
+                                try {
+                                    const parsed = JSON.parse(data);
+                                    const content = parsed.choices[0]?.delta?.content || '';
+                                    if (content) {
+                                        aiResponseContent += content;
+                                        contentDiv.innerText = aiResponseContent;
+                                        smartScrollToBottom();
+                                    }
+                                } catch (e) {
+                                    // Ignore JSON parsing errors
+                                }
+                            }
                         }
                     }
+                    
+                    contentDiv.innerHTML = marked.parse(aiResponseContent);
+                    const aiMessage = { id: aiMessageId, role: 'assistant', content: aiResponseContent };
+                    currentSession.messages.push(aiMessage);
                 }
-                
-                // 保存完整的AI消息到会话历史
-                currentSession.messages.push(aiMessage);
                 saveSessions();
 
             } catch (error) {
                 console.error('API call error:', error);
-                if (loadingDiv.parentNode) chatHistoryContainer.removeChild(loadingDiv);
-                addMessageToChat('抱歉，服务暂时不可用，请稍后再试。', false);
+                removeLoadingMessage();
+                addMessageToChat('抱歉，服务暂时不可用，请稍后再试。', false, generateId());
             } finally {
                 isLoading = false;
                 askButton.disabled = false;
@@ -761,6 +657,7 @@
                 sessions = [];
                 activeSessionId = null;
                 localStorage.removeItem('secretaryAiSessions');
+                localStorage.removeItem('secretaryEvents');
                 showNewChatScreen();
                 document.body.removeChild(modal);
             };
@@ -769,22 +666,12 @@
             };
         }
 
-        // --- CONTEXT MENU FUNCTIONS ---
         function showContextMenu(e) {
             e.preventDefault();
-            // 检查是否在聊天历史列表中
-            const chatItem = e.target.closest('a');
+            const chatItem = e.target.closest('a[data-session-id]');
             if (!chatItem) return;
             
-            // 找到对应的session
-            const sessionIndex = Array.from(chatHistoryList.children).indexOf(chatItem);
-            if (sessionIndex === -1) return;
-            
-            const session = sessions[sessions.length - 1 - sessionIndex]; // 因为使用prepend，顺序是反的
-            if (!session) return;
-            
-            contextMenu.dataset.targetSessionId = session.id;
-            
+            contextMenu.dataset.targetSessionId = chatItem.dataset.sessionId;
             contextMenu.style.top = `${e.clientY}px`;
             contextMenu.style.left = `${e.clientX}px`;
             contextMenu.classList.remove('hidden');
@@ -798,28 +685,37 @@
             const sessionId = contextMenu.dataset.targetSessionId;
             if (!sessionId) return;
             
-            // 确认删除
-            if (confirm('确定要删除这个对话吗？此操作不可撤销。')) {
-                // 从sessions数组中移除
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white p-6 rounded-lg shadow-xl text-center">
+                    <p class="mb-4">确定要删除这个对话吗？</p>
+                    <button id="confirmDelete" class="bg-red-600 text-white px-4 py-2 rounded mr-2 hover:bg-red-700">删除</button>
+                    <button id="cancelDelete" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">取消</button>
+                </div>`;
+            document.body.appendChild(modal);
+
+            document.getElementById('confirmDelete').onclick = () => {
                 sessions = sessions.filter(session => session.id !== sessionId);
                 saveSessions();
                 
-                // 如果删除的是当前活跃会话，切换到新对话
                 if (activeSessionId === sessionId) {
-                    activeSessionId = null;
                     showNewChatScreen();
                 }
                 
-                // 重新渲染聊天列表
                 renderChatList();
-            }
+                document.body.removeChild(modal);
+            };
+            document.getElementById('cancelDelete').onclick = () => {
+                document.body.removeChild(modal);
+            };
             
             hideContextMenu();
         }
 
-        // --- CALENDAR FUNCTIONS ---
+        // --- CALENDAR & NOTIFICATION FUNCTIONS ---
         function openCalendar() {
-            const calendarModal = document.getElementById('calendarModal');
+             const calendarModal = document.getElementById('calendarModal');
             if (calendarModal) {
                 calendarModal.style.display = 'block';
                 currentCalendarDate = new Date();
@@ -854,7 +750,7 @@
             const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
             weekdays.forEach(day => {
                 const dayHeader = document.createElement('div');
-                dayHeader.className = 'calendar-day font-semibold text-center bg-gray-100 !cursor-default';
+                dayHeader.className = 'text-center font-semibold p-2 bg-gray-100';
                 dayHeader.textContent = day;
                 calendar.appendChild(dayHeader);
             });
@@ -866,7 +762,7 @@
             const allEvents = JSON.parse(localStorage.getItem('secretaryEvents') || '[]');
 
             for (let i = 0; i < firstDayOfWeek; i++) {
-                calendar.appendChild(document.createElement('div')).className = 'calendar-day !cursor-default';
+                calendar.appendChild(document.createElement('div'));
             }
 
             for (let day = 1; day <= lastDayOfMonth.getDate(); day++) {
@@ -909,13 +805,11 @@
             const text = textInput.value.trim();
             const time = timeInput.value;
             
-            if (!date || !text) {
-                alert('请填写完整的日期和事件内容');
-                return;
-            }
+            if (!date || !text) return;
             
             let events = JSON.parse(localStorage.getItem('secretaryEvents') || '[]');
-            events.push({ id: Date.now(), date, time, text, type: 'manual' });
+            const dateTime = new Date(`${date}T${time || '00:00'}`).getTime();
+            events.push({ id: Date.now(), date, time, text, dateTime, type: 'manual' });
             localStorage.setItem('secretaryEvents', JSON.stringify(events));
             
             textInput.value = '';
@@ -964,208 +858,56 @@
             loadModalEvents();
         }
 
-        // --- REMINDER SYSTEM ---
-        class SimpleTimeParser {
-            static parseFixedFormat(text) {
-                const now = new Date();
-                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                
-                // 固定格式：日期 时间 内容
-                // 支持格式：今天/明天/后天 HH:MM 内容 或 MM-DD HH:MM 内容 或 YYYY-MM-DD HH:MM 内容
-                const patterns = [
-                    // 相对日期格式：今天/明天/后天 HH:MM 内容
-                    /^(今天|明天|后天)\s+(\d{1,2}):(\d{2})\s+(.+)$/,
-                    // 月日格式：MM-DD HH:MM 内容
-                    /^(\d{1,2})-(\d{1,2})\s+(\d{1,2}):(\d{2})\s+(.+)$/,
-                    // 完整日期格式：YYYY-MM-DD HH:MM 内容
-                    /^(\d{4})-(\d{1,2})-(\d{1,2})\s+(\d{1,2}):(\d{2})\s+(.+)$/
-                ];
-                
-                for (let i = 0; i < patterns.length; i++) {
-                    const match = text.trim().match(patterns[i]);
-                    if (match) {
-                        let targetDate = new Date(today);
-                        let hour, minute, content;
-                        
-                        if (i === 0) {
-                            // 相对日期格式
-                            const [, dateKeyword, h, m, c] = match;
-                            hour = parseInt(h);
-                            minute = parseInt(m);
-                            content = c;
-                            
-                            switch (dateKeyword) {
-                                case '明天':
-                                    targetDate.setDate(targetDate.getDate() + 1);
-                                    break;
-                                case '后天':
-                                    targetDate.setDate(targetDate.getDate() + 2);
-                                    break;
-                                // '今天' 保持不变
-                            }
-                        } else if (i === 1) {
-                            // 月日格式
-                            const [, month, day, h, m, c] = match;
-                            const targetMonth = parseInt(month) - 1;
-                            const targetDay = parseInt(day);
-                            hour = parseInt(h);
-                            minute = parseInt(m);
-                            content = c;
-                            
-                            targetDate = new Date(now.getFullYear(), targetMonth, targetDay);
-                            // 如果日期已过，设为明年
-                            if (targetDate < today) {
-                                targetDate.setFullYear(targetDate.getFullYear() + 1);
-                            }
-                        } else {
-                            // 完整日期格式
-                            const [, year, month, day, h, m, c] = match;
-                            hour = parseInt(h);
-                            minute = parseInt(m);
-                            content = c;
-                            
-                            targetDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-                        }
-                        
-                        // 验证时间格式
-                        if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
-                            continue;
-                        }
-                        
-                        const finalDateTime = new Date(targetDate);
-                        finalDateTime.setHours(hour, minute, 0, 0);
-                        
-                        // 检查时间是否有效（未来时间）
-                        if (finalDateTime > now) {
-                            return {
-                                dateTime: finalDateTime,
-                                content: content.trim(),
-                                isValid: true
-                            };
-                        }
-                    }
-                }
-                
-                return {
-                    dateTime: null,
-                    content: '',
-                    isValid: false
-                };
-            }
-        }
-        
-        class ReminderManager {
-            static createReminder(content, dateTime) {
-                const reminder = {
-                    id: Date.now(),
-                    date: dateTime.toISOString().split('T')[0],
-                    time: dateTime.toTimeString().slice(0, 5),
-                    text: content,
-                    type: 'reminder',
-                    notified: false,
-                    source: 'ai_reminder',
-                    dateTime: dateTime.getTime()
-                };
-                
-                // 保存到日历事件
-                let events = JSON.parse(localStorage.getItem('secretaryEvents') || '[]');
-                events.push(reminder);
-                localStorage.setItem('secretaryEvents', JSON.stringify(events));
-                
-                // 设置通知
-                NotificationService.scheduleNotification(reminder);
-                
-                return reminder;
-            }
-            
-            static checkPendingReminders() {
-                const now = new Date().getTime();
-                const events = JSON.parse(localStorage.getItem('secretaryEvents') || '[]');
-                
-                events.forEach(event => {
-                    if (event.type === 'reminder' && !event.notified && event.dateTime <= now) {
-                        NotificationService.showNotification(event.text, {
-                            body: `提醒时间：${event.date} ${event.time}`,
-                            icon: '/favicon.ico',
-                            tag: `reminder-${event.id}`
-                        });
-                        
-                        // 标记为已通知
-                        event.notified = true;
+        function scheduleNotification(event) {
+            const now = Date.now();
+            const delay = event.dateTime - now;
+            if (delay > 0) {
+                setTimeout(() => {
+                    new Notification('文秘助理提醒', {
+                        body: event.text,
+                        icon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⏰</text></svg>'
+                    });
+                    let events = JSON.parse(localStorage.getItem('secretaryEvents') || '[]');
+                    const eventToUpdate = events.find(e => e.id === event.id);
+                    if (eventToUpdate) {
+                        eventToUpdate.notified = true;
                         localStorage.setItem('secretaryEvents', JSON.stringify(events));
                     }
-                });
+                }, delay);
             }
         }
-        
-        class NotificationService {
-            static async requestPermission() {
-                if ('Notification' in window) {
-                    const permission = await Notification.requestPermission();
-                    return permission === 'granted';
-                }
-                return false;
-            }
-            
-            static showNotification(title, options = {}) {
-                if ('Notification' in window && Notification.permission === 'granted') {
-                    return new Notification(title, {
-                        body: options.body || '',
-                        icon: options.icon || '/favicon.ico',
-                        tag: options.tag || 'reminder',
-                        requireInteraction: true,
-                        ...options
+
+        function checkPendingReminders() {
+            const now = Date.now();
+            let events = JSON.parse(localStorage.getItem('secretaryEvents') || '[]');
+            let changed = false;
+            events.forEach(event => {
+                if (event.type === 'reminder' && !event.notified && event.dateTime <= now) {
+                    new Notification('文秘助理提醒 (过期)', {
+                        body: event.text,
+                        icon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⏰</text></svg>'
                     });
+                    event.notified = true;
+                    changed = true;
                 }
-            }
-            
-            static scheduleNotification(reminder) {
-                const now = new Date().getTime();
-                const delay = reminder.dateTime - now;
-                
-                if (delay > 0) {
-                    setTimeout(() => {
-                        this.showNotification(reminder.text, {
-                            body: `提醒时间：${reminder.date} ${reminder.time}`,
-                            icon: '/favicon.ico',
-                            tag: `reminder-${reminder.id}`
-                        });
-                    }, delay);
-                }
+            });
+            if (changed) {
+                localStorage.setItem('secretaryEvents', JSON.stringify(events));
             }
         }
-        
-        // 初始化通知权限和提醒检查
+
         async function initializeReminderSystem() {
-            console.log('初始化提醒系统...');
-            
-            // 请求通知权限
-            const permission = await NotificationService.requestPermission();
-            console.log('通知权限状态:', Notification.permission);
-            
-            // 如果权限被拒绝，显示提示
-            if (Notification.permission === 'denied') {
-                console.warn('通知权限被拒绝，提醒功能将无法正常工作');
+            if ('Notification' in window) {
+                if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+                    await Notification.requestPermission();
+                }
             }
-            
-            // 定期检查提醒
-            setInterval(() => {
-                ReminderManager.checkPendingReminders();
-            }, 30000); // 每30秒检查一次，更频繁
-            
-            // 立即检查一次
-            ReminderManager.checkPendingReminders();
+            checkPendingReminders();
+            setInterval(checkPendingReminders, 60000);
         }
-        
-        // 页面加载完成后初始化
-        initializeReminderSystem();
-        
-        // --- MODE MANAGEMENT ---
-        // Mode management is handled in setMode() and loadChat() functions
 
         // --- INITIALIZATION & EVENT LISTENERS ---
         document.addEventListener('DOMContentLoaded', function() {
-            // Chat Listeners
             askButton.addEventListener('click', sendMessage);
             userInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -1173,52 +915,32 @@
                     sendMessage();
                 }
             });
-            newChatBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                showNewChatScreen();
-            });
-            clearHistoryBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                clearAllHistory();
-            });
-
-            // Context Menu Listeners (绑定到侧边栏聊天历史)
+            newChatBtn.addEventListener('click', showNewChatScreen);
+            clearHistoryBtn.addEventListener('click', clearAllHistory);
             chatHistoryList.addEventListener('contextmenu', showContextMenu);
             window.addEventListener('click', hideContextMenu);
-
-            // Sidebar Collapse Listeners
             sidebarToggleBtn.addEventListener('click', () => {
-                const isHidden = sidebar.classList.toggle('hidden');
-                localStorage.setItem('sidebarCollapsed', isHidden);
+                sidebar.classList.toggle('hidden');
+                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('hidden'));
             });
-
             collapseHistoryBtn.addEventListener('click', () => {
                 const isHidden = chatHistoryList.classList.toggle('hidden');
                 collapseHistoryBtn.querySelector('svg').style.transform = isHidden ? 'rotate(-90deg)' : 'rotate(0deg)';
                 localStorage.setItem('isHistoryCollapsed', isHidden);
             });
-
-            // Calendar Listeners
-            calendarButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                openCalendar();
-            });
+            calendarButton.addEventListener('click', openCalendar);
             window.addEventListener('click', (e) => {
-                const modal = document.getElementById('calendarModal');
-                if (e.target === modal) closeCalendar();
+                if (e.target === document.getElementById('calendarModal')) closeCalendar();
             });
 
-            // Initial Load
             loadSessions();
             renderChatList();
             showNewChatScreen();
+            initializeReminderSystem();
 
-            // Restore sidebar collapsed state
             if (localStorage.getItem('sidebarCollapsed') === 'true') {
                 sidebar.classList.add('hidden');
             }
-
-            // Restore history list collapsed state
             const isHistoryCollapsed = localStorage.getItem('isHistoryCollapsed') === 'true';
             chatHistoryList.classList.toggle('hidden', isHistoryCollapsed);
             collapseHistoryBtn.querySelector('svg').style.transform = isHistoryCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
