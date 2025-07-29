@@ -263,7 +263,7 @@
                 <div class="p-3 bg-blue-50 border border-blue-200 rounded">
                     <div class="font-medium mb-2">方法一：快速设置 (推荐)</div>
                     <ol class="list-decimal list-inside space-y-1">
-                        <li>点击浏览器地址栏左侧的 🔔 图标。</li>
+                        <li>点击浏览器地址栏左侧的 🔒 或 🔔 图标。</li>
                         <li>在弹出的菜单中，找到“通知”选项。</li>
                         <li>选择“允许”。</li>
                     </ol>
@@ -280,11 +280,11 @@
                  <div class="text-center mt-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <img src="edge-example.png" alt="浏览器通知设置示例" class="max-w-full h-auto rounded border cursor-pointer hover:opacity-80 transition-opacity" style="max-height: 200px;" onerror="this.style.display='none'" onclick="openImageModal('edge-example.png', 'Edge浏览器通知设置示例')">
+                            <img src="images/edge-example.png" alt="浏览器通知设置示例" class="max-w-full h-auto rounded border cursor-pointer hover:opacity-80 transition-opacity" style="max-height: 200px;" onerror="this.onerror=null;this.src='https://placehold.co/400x200/fecaca/991b1b?text=Image+Not+Found';" onclick="openImageModal('images/edge-example.png', 'Edge浏览器通知设置示例')">
                             <div class="text-xs text-gray-500 mt-1">Edge浏览器设置示例</div>
                         </div>
                         <div>
-                            <img src="example2.png" alt="浏览器通知权限设置示例" class="max-w-full h-auto rounded border cursor-pointer hover:opacity-80 transition-opacity" style="max-height: 200px;" onerror="this.style.display='none'" onclick="openImageModal('example2.png', '浏览器通知权限设置示例')">
+                            <img src="images/example2.png" alt="浏览器通知权限设置示例" class="max-w-full h-auto rounded border cursor-pointer hover:opacity-80 transition-opacity" style="max-height: 200px;" onerror="this.onerror=null;this.src='https://placehold.co/400x200/fecaca/991b1b?text=Image+Not+Found';" onclick="openImageModal('images/example2.png', '浏览器通知权限设置示例')">
                             <div class="text-xs text-gray-500 mt-1">通知权限设置示例</div>
                         </div>
                     </div>
@@ -299,7 +299,7 @@
             <span class="close" onclick="closeImageModal()">&times;</span>
             <div class="text-center">
                 <h3 id="imageModalTitle" class="text-lg font-bold mb-4"></h3>
-                <img id="imageModalImg" src="" alt="" class="max-w-full max-h-full rounded border">
+                <img id="imageModalImg" src="" alt="" class="max-w-full max-h-[80vh] rounded border">
             </div>
         </div>
     </div>
@@ -1107,6 +1107,7 @@
                 if (e.target === document.getElementById('calendarModal')) closeCalendar();
                 if (e.target === document.getElementById('reminderListModal')) closeReminderList();
                 if (e.target === document.getElementById('permissionHelpModal')) closePermissionHelp();
+                if (e.target === document.getElementById('imageModal')) closeImageModal();
             });
 
             loadSessions();
