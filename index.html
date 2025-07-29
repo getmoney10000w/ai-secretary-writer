@@ -112,6 +112,11 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" />
                 </svg>
             </button>
+            <button id="reminderListBtn" title="查看提醒列表" class="p-2 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-200">
+                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+            </button>
         </div>
         
         <!-- Main Sidebar -->
@@ -144,6 +149,11 @@
 
         <!-- Main Content -->
         <main class="flex-1 flex flex-col bg-gray-50 relative">
+            <button id="permissionHelpBtn" title="通知权限设置帮助" class="absolute top-4 right-4 p-2 rounded-full text-gray-500 hover:bg-gray-200 z-10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.79 4 4s-1.79 4-4 4-4-1.79-4-4c0-1.193.5-2.258 1.28-3.026M13 16a1 1 0 11-2 0 1 1 0 012 0z"></path>
+                </svg>
+            </button>
             <div class="w-full h-full flex flex-col max-w-4xl mx-auto">
                 <!-- Chat Area -->
                 <div id="chatHistory" class="chat-container flex-1 p-6 overflow-y-auto flex flex-col space-y-4">
@@ -227,9 +237,69 @@
                         <button onclick="addModalEvent()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">添加事件</button>
                     </div>
                     <hr class="my-4">
-                    <h3 class="font-semibold mb-2">事件列表</h3>
+                    <h3 class="font-semibold mb-2">当天事件列表</h3>
                     <div id="modalEventsList" class="max-h-60 overflow-y-auto"></div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reminder List Modal -->
+    <div id="reminderListModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeReminderList()">&times;</span>
+            <h2 class="text-xl font-bold mb-4">所有提醒和事件</h2>
+             <div id="allEventsList" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <!-- Permission Help Modal -->
+    <div id="permissionHelpModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closePermissionHelp()">&times;</span>
+            <h2 class="text-xl font-bold mb-4">💡 通知权限设置说明</h2>
+            <div class="text-sm text-gray-700 space-y-4">
+                <p>为了让“智能提醒”功能正常工作，您需要在浏览器中允许本网站发送通知。</p>
+                <div class="p-3 bg-blue-50 border border-blue-200 rounded">
+                    <div class="font-medium mb-2">方法一：快速设置 (推荐)</div>
+                    <ol class="list-decimal list-inside space-y-1">
+                        <li>点击浏览器地址栏左侧的 🔔 图标。</li>
+                        <li>在弹出的菜单中，找到“通知”选项。</li>
+                        <li>选择“允许”。</li>
+                    </ol>
+                </div>
+                <div class="p-3 bg-green-50 border border-green-200 rounded">
+                    <div class="font-medium mb-2">方法二：通过浏览器设置页面</div>
+                     <p class="mb-2">如果快速设置无效，可以手动进入浏览器设置页面：</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>Chrome:</strong> 复制并打开 <a href="chrome://settings/content/notifications" class="text-blue-600 underline" target="_blank">chrome://settings/content/notifications</a></li>
+                        <li><strong>Edge:</strong> 复制并打开 <a href="edge://settings/content/notifications" class="text-blue-600 underline" target="_blank">edge://settings/content/notifications</a></li>
+                    </ul>
+                     <p class="mt-2">在设置页面中找到本网站地址并允许其发送通知。</p>
+                </div>
+                 <div class="text-center mt-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <img src="edge示例.png" alt="浏览器通知设置示例" class="max-w-full h-auto rounded border cursor-pointer hover:opacity-80 transition-opacity" style="max-height: 200px;" onerror="this.style.display='none'" onclick="openImageModal('edge示例.png', 'Edge浏览器通知设置示例')">
+                            <div class="text-xs text-gray-500 mt-1">Edge浏览器设置示例</div>
+                        </div>
+                        <div>
+                            <img src="示例2.png" alt="浏览器通知权限设置示例" class="max-w-full h-auto rounded border cursor-pointer hover:opacity-80 transition-opacity" style="max-height: 200px;" onerror="this.style.display='none'" onclick="openImageModal('示例2.png', '浏览器通知权限设置示例')">
+                            <div class="text-xs text-gray-500 mt-1">通知权限设置示例</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal" style="z-index: 1001;">
+        <div class="modal-content" style="max-width: 90vw; max-height: 90vh; padding: 20px;">
+            <span class="close" onclick="closeImageModal()">&times;</span>
+            <div class="text-center">
+                <h3 id="imageModalTitle" class="text-lg font-bold mb-4"></h3>
+                <img id="imageModalImg" src="" alt="" class="max-w-full max-h-full rounded border">
             </div>
         </div>
     </div>
@@ -263,8 +333,11 @@
         const newChatBtn = document.getElementById('newChatBtn');
         const clearHistoryBtn = document.getElementById('clearHistory');
         const calendarButton = document.getElementById('calendarButton');
+        const reminderListBtn = document.getElementById('reminderListBtn');
         const collapseHistoryBtn = document.getElementById('collapseHistoryBtn');
         const contextMenu = document.getElementById('contextMenu');
+        const permissionHelpBtn = document.getElementById('permissionHelpBtn');
+        const permissionHelpModal = document.getElementById('permissionHelpModal');
 
         // --- UTILITY FUNCTIONS ---
         function generateId() {
@@ -371,30 +444,28 @@
                 currentModeDisplay.textContent = modeName;
                 modeDescription.textContent = modeDesc;
                 modeInfoBar.style.display = 'block';
-            }
-            
-            if (mode === 'reminder') {
-                userInput.placeholder = "例如：提醒我明天下午3点开会";
-                const permissionStatus = Notification.permission;
-                let statusMessage = '';
-                let statusColor = '';
-                
-                if (permissionStatus === 'granted') {
-                    statusMessage = '✅ 通知权限已授权';
-                    statusColor = 'text-green-600';
-                } else if (permissionStatus === 'denied') {
-                    statusMessage = '❌ 通知权限被拒绝，请在浏览器设置中允许通知';
-                    statusColor = 'text-red-600';
+
+                if (mode === 'reminder') {
+                    userInput.placeholder = "例如：提醒我明天下午3点开会";
+                    const permissionStatus = Notification.permission;
+                    let statusMessage = '';
+                    let statusColor = '';
+                    
+                    if (permissionStatus === 'granted') {
+                        statusMessage = '✅ 通知权限已授权';
+                        statusColor = 'text-green-600';
+                    } else if (permissionStatus === 'denied') {
+                        statusMessage = '❌ 通知权限被拒绝';
+                        statusColor = 'text-red-600';
+                    } else {
+                        statusMessage = '⚠️ 通知权限待授权';
+                        statusColor = 'text-yellow-600';
+                    }
+                    
+                    modeDescription.innerHTML = `${modeDesc} <span class="font-medium ${statusColor}">${statusMessage}</span>`;
                 } else {
-                    statusMessage = '⚠️ 通知权限待授权，将在创建提醒时请求';
-                    statusColor = 'text-yellow-600';
+                    userInput.placeholder = `已选择${modeName}模式，开始提问...`;
                 }
-                
-                if (modeDescription) {
-                    modeDescription.innerHTML = `用自然语言设置提醒<br><span class="${statusColor} text-sm">${statusMessage}</span>`;
-                }
-            } else {
-                 userInput.placeholder = `已选择${selectedBtn.querySelector('h3').textContent}模式，开始提问...`;
             }
             userInput.focus();
         }
@@ -723,12 +794,50 @@
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('modalEventDate').value = today;
                 generateCalendar();
-                loadModalEvents();
+                loadModalEventsForDay();
             }
         }
 
         function closeCalendar() {
             document.getElementById('calendarModal').style.display = 'none';
+        }
+
+        function openReminderList() {
+            const reminderModal = document.getElementById('reminderListModal');
+            if (reminderModal) {
+                reminderModal.style.display = 'block';
+                loadAllEvents();
+            }
+        }
+
+        function closeReminderList() {
+            document.getElementById('reminderListModal').style.display = 'none';
+        }
+
+        function openPermissionHelp() {
+            if (permissionHelpModal) permissionHelpModal.style.display = 'block';
+        }
+
+        function closePermissionHelp() {
+            if (permissionHelpModal) permissionHelpModal.style.display = 'none';
+        }
+
+        function openImageModal(imageSrc, imageTitle) {
+            const imageModal = document.getElementById('imageModal');
+            const imageModalImg = document.getElementById('imageModalImg');
+            const imageModalTitle = document.getElementById('imageModalTitle');
+            
+            if (imageModal && imageModalImg && imageModalTitle) {
+                imageModalImg.src = imageSrc;
+                imageModalImg.alt = imageTitle;
+                imageModalTitle.textContent = imageTitle;
+                imageModal.style.display = 'block';
+            }
+        }
+
+        function closeImageModal() {
+            const imageModal = document.getElementById('imageModal');
+            if (imageModal) imageModal.style.display = 'none';
         }
 
         function changeMonth(offset) {
@@ -790,7 +899,7 @@
                     document.getElementById('modalEventDate').value = dateStr;
                     document.querySelectorAll('.calendar-day.selected').forEach(d => d.classList.remove('selected'));
                     dayDiv.classList.add('selected');
-                    loadModalEvents();
+                    loadModalEventsForDay();
                 };
                 
                 calendar.appendChild(dayDiv);
@@ -817,10 +926,10 @@
             timeInput.value = '';
             
             generateCalendar();
-            loadModalEvents();
+            loadModalEventsForDay();
         }
 
-        function loadModalEvents() {
+        function loadModalEventsForDay() {
             const eventsList = document.getElementById('modalEventsList');
             const selectedDate = document.getElementById('modalEventDate').value;
             if (!eventsList || !selectedDate) return;
@@ -845,19 +954,80 @@
                             <div class="text-sm text-gray-600">${event.text}</div>
                             <div class="text-xs text-blue-500">${typeLabel}</div>
                         </div>
-                        <button onclick="deleteModalEvent(${event.id})" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">删除</button>
+                        <button onclick="deleteEvent(${event.id}, true)" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">删除</button>
                     </div>
                 `;
             }).join('');
         }
+        
+        function loadAllEvents() {
+            const allEventsList = document.getElementById('allEventsList');
+            if (!allEventsList) return;
 
-        function deleteModalEvent(id) {
+            const allEvents = JSON.parse(localStorage.getItem('secretaryEvents') || '[]');
+            const now = new Date();
+            now.setHours(0, 0, 0, 0); // Set to beginning of today for date comparison
+
+            const upcomingEvents = allEvents
+                .filter(event => new Date(event.date) >= now)
+                .sort((a, b) => a.dateTime - b.dateTime);
+            
+            const pastEvents = allEvents
+                .filter(event => new Date(event.date) < now)
+                .sort((a, b) => b.dateTime - a.dateTime);
+
+            let html = '';
+
+            html += '<h3 class="text-lg font-semibold border-b pb-2">未来事件</h3>';
+            if (upcomingEvents.length > 0) {
+                html += upcomingEvents.map(event => renderEventItem(event)).join('');
+            } else {
+                html += '<p class="text-gray-500 py-4">没有未来的事件。</p>';
+            }
+
+            html += '<h3 class="text-lg font-semibold border-b pb-2 mt-6">历史事件</h3>';
+            if (pastEvents.length > 0) {
+                html += pastEvents.map(event => renderEventItem(event)).join('');
+            } else {
+                html += '<p class="text-gray-500 py-4">没有历史事件。</p>';
+            }
+
+            allEventsList.innerHTML = html;
+        }
+
+        function renderEventItem(event) {
+            const typeIcon = event.type === 'reminder' ? '⏰' : '📅';
+            const typeLabel = event.type === 'reminder' ? '智能提醒' : '手动事件';
+            const eventDate = new Date(event.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            return `
+                <div class="flex justify-between items-start p-3 border rounded-lg shadow-sm">
+                    <div class="flex-1">
+                        <div class="font-bold text-gray-800">${event.text}</div>
+                        <div class="text-sm text-gray-600 mt-1">
+                            <span>${typeIcon} ${eventDate} ${event.time || '全天'}</span>
+                        </div>
+                        <div class="text-xs text-blue-500 mt-1">${typeLabel}</div>
+                    </div>
+                    <button onclick="deleteEvent(${event.id}, false)" class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs hover:bg-red-200 ml-4">删除</button>
+                </div>
+            `;
+        }
+
+
+        function deleteEvent(id, isFromCalendar) {
             let events = JSON.parse(localStorage.getItem('secretaryEvents') || '[]');
             events = events.filter(event => event.id !== id);
             localStorage.setItem('secretaryEvents', JSON.stringify(events));
-            generateCalendar();
-            loadModalEvents();
+            
+            if (isFromCalendar) {
+                generateCalendar();
+                loadModalEventsForDay();
+            } else {
+                loadAllEvents();
+            }
         }
+
 
         function scheduleNotification(event) {
             const now = Date.now();
@@ -930,8 +1100,13 @@
                 localStorage.setItem('isHistoryCollapsed', isHidden);
             });
             calendarButton.addEventListener('click', openCalendar);
+            reminderListBtn.addEventListener('click', openReminderList);
+            permissionHelpBtn.addEventListener('click', openPermissionHelp);
+            
             window.addEventListener('click', (e) => {
                 if (e.target === document.getElementById('calendarModal')) closeCalendar();
+                if (e.target === document.getElementById('reminderListModal')) closeReminderList();
+                if (e.target === document.getElementById('permissionHelpModal')) closePermissionHelp();
             });
 
             loadSessions();
